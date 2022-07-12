@@ -2,14 +2,16 @@
 BasicEventViewer BEV4
 
  BasicEventViewer v4.0 in may 2022 Updated for ver (.NET 4.5) , Published by Damon Mohammadbagher.
+
+ ```diff 
+ + last source/exe update(1) v4.3.194.120 [Jul 12, 2022]...
+ ```
  
  BEV4 is Event Monitor tool (real-time & search) some simple things like Atomic-red-team yaml file added for test & Real time detection for some type of attack and ...
  
- Note: in this code some yaml files (atomic-red-team yaml files) added to source code as "Database" for Search in Sysmon Event ID 1 Logs (real-time & search), so this code was for test and my database in this code is not realy good for detection every thing but my tests was very good for some attack detection (real-time) , this code was for test and you can make your own code for real-time scanning Sysmon Events or ETW Events for Attack Detections based on Windows Events or ETW/Sysmon Events etc. you can load and watch my database in this tool and in this code All command prompts or powershell scripts will detect based on Yaml files information
+ Note: in this code some yaml files (atomic-red-team yaml files) added to source code as "Database" for Search in Sysmon Event ID 1 Logs (real-time & search), so this code was for test and my database in this code is not realy good for detection every thing but my tests was very good for some attack detection (real-time) , this code was for test and you can make your own code for real-time scanning Sysmon Events or ETW Events for Attack Detections based on Windows Events or ETW/Sysmon Events etc. you can load and watch my database in this tool and in this code All command prompts or powershell scripts will detect based on Yaml files information etc. 
  
- ```diff 
- + last source/exe update(1) v4.3.194.120 [jUL 12, 2022]...
- ```
+
 
 Video1 for BEV4: https://www.youtube.com/watch?v=imU82TApG2k
 
@@ -23,4 +25,41 @@ so about "Techniques vs Procedures" this video is very good and i am agree with 
 video link : https://youtu.be/MHfGIY2IyXE?t=414
 
 
+----------------------------------------------------------
+###  BEV4 v4.3.194.120 [Jul 12, 2022].(BEV4 Event viewer)
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_1.png)
+   
+###  BEV4 v4.3.194.120 .(BEV4 Load/Export Events to HTML/CSV or Load Events into BEV4 tool)
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_2.png)  
+
+###  BEV4 v4.3.194.120 .(BEV4 Sysmon EID 1 Events Load/Search by Mitre Attack yaml file [atomic-red-team])
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_3.png)  
+   
+###  BEV4 v4.3.194.120 .(BEV4  Load/Save, Search History)
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_4.png)  
+   
+###  BEV4 v4.3.194.120 .(BEV4 RealTime Monitoring Sysmon EID 1 and Mitre Attack Detection based on yaml files)
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_5.png)     
+   
+###  BEV4 v4.3.194.120 .(BEV4 Mitre Attack Detection, Database)
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_6.png)  
+   
+###  BEV4 v4.3.194.120 .(BEV4 Log Auditing)
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_7.png) 
+   
+###  BEV4 v4.3.194.120 .(BEV4 Log Auditing)
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_8.png)    
+   
+###  BEV4 v4.3.194.120 .(BEV4 Respond Analysis)
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_9.png)    
+   
+###  BEV4 v4.3.194.120 .(BEV4 Security log Filtering by Text)
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_11.png)    
+   
+###  BEV4 v4.3.194.120 .(BEV4 Security log Filtering by Security Event IDs)
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_12.png)    
+   
+   
+   
+   
 <p><a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/DamonMohammadbagher/BEV4/"/></a></p>
