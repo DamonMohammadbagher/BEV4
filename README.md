@@ -1,5 +1,15 @@
-# BEV4
-BasicEventViewer4 
+# BEV4 `(v4.3)`
+BasicEventViewer BEV4
+
+ BasicEventViewer v4.0 in may 2022 Updated for ver (.NET 4.5) , Published by Damon Mohammadbagher.
+ 
+ BEV4 is Event Monitor tool (real-time & search) some simple things like Atomic-red-team yaml file added for test & Real time detection for some type of attack and ...
+ 
+ Note: in this code some yaml files (atomic-red-team yaml files) added to source code as "Database" for Search in Sysmon Event ID 1 Logs (real-time & search), so this code was for test and my database in this code is not realy good for detection every thing but my tests was very good for some attack detection (real-time) , this code was for test and you can make your own code for real-time scanning Sysmon Events or ETW Events for Attack Detections based on Windows Events or ETW/Sysmon Events etc. you can load and watch my database in this tool and in this code All command prompts or powershell scripts will detect based on Yaml files information
+ 
+ ```diff 
+ + last source/exe update(1) v4.3.194.120 [jUL 12, 2022]...
+ ```
 
 Video1 for BEV4: https://www.youtube.com/watch?v=imU82TApG2k
 
