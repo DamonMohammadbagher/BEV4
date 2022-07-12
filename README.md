@@ -1,7 +1,6 @@
 # BEV4 `(v4.3)`
-BasicEventViewer BEV4
 
- BasicEventViewer v4.0 in may 2022 Updated for ver (.NET 4.5) , Published by Damon Mohammadbagher.
+ BasicEventViewer v4 in may 2022 Updated for ver (.NET 4.5) , Published by Damon Mohammadbagher.
 
  ```diff 
  + last source/exe update(1) v4.3.194.120 [Jul 12, 2022]...
