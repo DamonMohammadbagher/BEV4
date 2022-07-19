@@ -165,7 +165,7 @@ Logon Type:			%5
     level: 4
     task: 0
     keywords: 0x8000000000000000
-    message: %1
+    message: This event is generated when a logon session is destroyed.
 ++++
   event:
     value: 4647
