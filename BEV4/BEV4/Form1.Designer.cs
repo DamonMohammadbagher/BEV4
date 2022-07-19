@@ -454,8 +454,8 @@
             // toolStripStatusLabel9
             // 
             this.toolStripStatusLabel9.Name = "toolStripStatusLabel9";
-            this.toolStripStatusLabel9.Size = new System.Drawing.Size(208, 17);
-            this.toolStripStatusLabel9.Text = "MITRE ATTACK Realtime Monitor is off";
+            this.toolStripStatusLabel9.Size = new System.Drawing.Size(214, 17);
+            this.toolStripStatusLabel9.Text = "| MITRE ATTACK Realtime Monitor is off";
             // 
             // toolStripProgressBar1
             // 
@@ -2018,7 +2018,7 @@
             // 
             this.splitContainer11.Panel2.Controls.Add(this.groupBox15);
             this.splitContainer11.Size = new System.Drawing.Size(926, 177);
-            this.splitContainer11.SplitterDistance = 474;
+            this.splitContainer11.SplitterDistance = 436;
             this.splitContainer11.TabIndex = 0;
             // 
             // groupBox14
@@ -2028,7 +2028,7 @@
             this.groupBox14.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox14.Location = new System.Drawing.Point(0, 0);
             this.groupBox14.Name = "groupBox14";
-            this.groupBox14.Size = new System.Drawing.Size(472, 175);
+            this.groupBox14.Size = new System.Drawing.Size(434, 175);
             this.groupBox14.TabIndex = 0;
             this.groupBox14.TabStop = false;
             this.groupBox14.Text = "Event Message";
@@ -2040,7 +2040,7 @@
             this.richTextBox6.Location = new System.Drawing.Point(3, 16);
             this.richTextBox6.Name = "richTextBox6";
             this.richTextBox6.ReadOnly = true;
-            this.richTextBox6.Size = new System.Drawing.Size(466, 156);
+            this.richTextBox6.Size = new System.Drawing.Size(428, 156);
             this.richTextBox6.TabIndex = 2;
             this.richTextBox6.Text = "";
             // 
@@ -2051,7 +2051,7 @@
             this.groupBox15.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox15.Location = new System.Drawing.Point(0, 0);
             this.groupBox15.Name = "groupBox15";
-            this.groupBox15.Size = new System.Drawing.Size(446, 175);
+            this.groupBox15.Size = new System.Drawing.Size(484, 175);
             this.groupBox15.TabIndex = 1;
             this.groupBox15.TabStop = false;
             this.groupBox15.Text = "Details";
@@ -2063,7 +2063,8 @@
             this.richTextBox7.Location = new System.Drawing.Point(3, 16);
             this.richTextBox7.Name = "richTextBox7";
             this.richTextBox7.ReadOnly = true;
-            this.richTextBox7.Size = new System.Drawing.Size(440, 156);
+            this.richTextBox7.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedBoth;
+            this.richTextBox7.Size = new System.Drawing.Size(478, 156);
             this.richTextBox7.TabIndex = 0;
             this.richTextBox7.Text = "";
             // 
