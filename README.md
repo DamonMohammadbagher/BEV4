@@ -4,7 +4,7 @@
 
  ```diff 
  + last source/exe update(2) v4.3.200.138 [Jul 19, 2022]... , 
- + some bugs fixed & Real-time True/False Positive Detections saved into windows eventlog name BEV4.3 ;)
+ + some bugs fixed & Real-time True/False Positive Detections saved into windows eventlog with Name: BEV4.3
  ```
  
  BEV4 is Event Monitor tool (real-time & search) some simple things like Atomic-red-team yaml file added for test & Real time detection for some type of attack and ...
