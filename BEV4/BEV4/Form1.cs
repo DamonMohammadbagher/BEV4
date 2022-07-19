@@ -530,7 +530,8 @@ namespace BEV4
             {
                 try
                 {
-                    List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes> list = null;
+                    int counts = 0;
+                    List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes> list = new List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes>();
                     toolStripStatusLabel6.Text = RealTime.RealtimeEventIDsMonitor.CurrentScan2;
                     toolStripStatusLabel8.Text = RealTime.RealtimeEventIDsMonitor.CurrentScan;
 
@@ -551,8 +552,8 @@ namespace BEV4
 
 
                         }
-
-                        int counts = list.Count;
+                        if(list !=null)
+                        counts = list.Count;
 
                         if (counts != listView2.Items.Count)
                         {
