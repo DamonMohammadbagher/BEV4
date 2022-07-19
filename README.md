@@ -3,7 +3,7 @@
  BasicEventViewer v4 in may 2022 Updated for ver (.NET 4.5) , Published by Damon Mohammadbagher.
 
  ```diff 
- + last source/exe update(1) v4.3.194.120 [Jul 12, 2022]...
+ + last source/exe update(2) v4.3.200.138 [Jul 19, 2022]... , some bugs fixed ;)
  ```
  
  BEV4 is Event Monitor tool (real-time & search) some simple things like Atomic-red-team yaml file added for test & Real time detection for some type of attack and ...
@@ -23,6 +23,9 @@ video link : https://youtu.be/MHfGIY2IyXE?t=414
 
 
 ----------------------------------------------------------
+###  BEV4 v4.3.200.138 [Jul 19, 2022].(BEV4 All Detection now savedinto windows Eventlog Name [BEV4.3])
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_14.png)
+
 ###  BEV4 v4.3.194.120 [Jul 12, 2022].(BEV4 Event viewer)
    ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_1.png)
    
@@ -36,7 +39,7 @@ video link : https://youtu.be/MHfGIY2IyXE?t=414
    ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_4.png)  
    
 ###  BEV4 v4.3.194.120 .(BEV4 RealTime Monitoring Sysmon EID 1 and Mitre Attack Detection based on yaml files)
-   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_5.png)     
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_13.png)     
    
 ###  BEV4 v4.3.194.120 .(BEV4 Mitre Attack Detection, Database)
    ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_6.png)  
