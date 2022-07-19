@@ -8,10 +8,11 @@ using System.IO;
 using System.Threading;
 using System.Data;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace BEV4.RealTime
 {
-    class RealtimeEventIDsMonitor : Form
+    class RealtimeEventIDsMonitor
     {
         public struct _TableofProcess
         {
@@ -89,12 +90,22 @@ namespace BEV4.RealTime
         public static string CurrentScan = "";
         public static string CurrentScan2 = "";
         public static bool init = false;
+        public static EventLog BEV4 = null;
+        public static string last_Detection = "";
+        public static string last_Detection2 = "";
+        public static string TechniqueId_Command_Details_DB_Index = "";
+        public static string TechniqueId_Command_Details_DisplayName = "";
+        public static string TechniqueId_Command_Details_TechniqueID = "";
+        public static string TechniqueId_Command_Details_Command_Str = "";
+        public static string CheckFalsePositive = "";
+        public static Thread _Thread_RealTimeMon2;
+
 
         public static void RunMonitor_Sysmon()
         {
             try
             {
-                string CommandsListFile = Resource2.TextFile1_AllCommandPrompts;                
+                string CommandsListFile = Resource2.TextFile1_AllCommandPrompts;
 
                 /// 365: [- name: Enumeration for PuTTY Credentials in Registry] [attack_technique: T1552.002] [      reg query HKCU\Software\SimonTatham\PuTTY\Sessions /t REG_SZ /s]
                 _DetailsCommands_yamlfiles_details = CommandsListFile.Split('\n');
@@ -120,9 +131,10 @@ namespace BEV4.RealTime
 
         public static async Task _Scan()
         {
+            init = true;
             await Task.Run(() =>
             {
-                Thread.CurrentThread.Priority = ThreadPriority.Highest;
+                //Thread.CurrentThread.Priority = ThreadPriority.Highest;
                 ///365: [- name: Enumeration for PuTTY Credentials in Registry] [attack_technique: T1552.002] [      reg query HKCU\Software\SimonTatham\PuTTY\Sessions /t REG_SZ /s]
                 string[] attack_technique_Commands_sub_Items = null;
                 string[] Processes_Sysmon_CommandLines_sub_Items = null;
@@ -137,7 +149,7 @@ namespace BEV4.RealTime
                 int counts = 0;
                 int counts2 = 0;
                 int loop = 1;
-                init = true;
+
                 TimeSpan ts = new TimeSpan();
                 TimeSpan _ts = new TimeSpan();
                 DateTime d1 = DateTime.Now;
@@ -145,8 +157,8 @@ namespace BEV4.RealTime
                 DateTime d11 = DateTime.Now;
                 DateTime d22 = DateTime.Now;
                 DateTime _xdt = DateTime.Now;
-                DateTime _xdt2 = DateTime.Now;                
-                DataTable TempTable_MitreAttackTechniques = Master_Value.MasterValueClass.table_MitreAttackTechniques;                
+                DateTime _xdt2 = DateTime.Now;
+                DataTable TempTable_MitreAttackTechniques = Master_Value.MasterValueClass.table_MitreAttackTechniques;
                 DataRow[] DataTable_rows_MitreAttack_DB = new DataRow[1];
                 string[] _commandx = null;
 
@@ -161,10 +173,10 @@ namespace BEV4.RealTime
                     List<_TableOfSysmon_Processes> Process_list_Arguments =
                     Sysmon_Process_Table.FindAll(X => X.IsChecked == false || X.CheckScore < 5);
 
-                    List<_TableOfSysmon_Processes>  Filtered_Process_list_Arguments = Sysmon_Process_Table
+                    List<_TableOfSysmon_Processes> Filtered_Process_list_Arguments = Sysmon_Process_Table
                           .GroupBy(x => x.PID).Select(x => x.First()).ToList()
                           .FindAll(X => X.IsChecked == false || X.CheckScore < 5);
-                   
+
                     foreach (_TableOfSysmon_Processes item in Filtered_Process_list_Arguments)
                     {
                         _commandx = item._CommandLine.Split(' ');
@@ -180,7 +192,7 @@ namespace BEV4.RealTime
                             {
                                 try
                                 {
-                                    string _query = "Technique_Step_Command LIKE '*" + _commandx[1] + "*'";
+                                    string _query = "Technique_Step_Command LIKE '*" + _commandx[1].Replace('\'', ' ') + "*'";
                                     DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
                                 }
                                 catch (Exception)
@@ -196,7 +208,7 @@ namespace BEV4.RealTime
                                 {
                                     try
                                     {
-                                        string _query = "Technique_Step_Command LIKE '*" + _commandx[1] + "*' OR Technique_Step_Command LIKE'*" + _commandx[2] + "*'";
+                                        string _query = "Technique_Step_Command LIKE '*" + _commandx[1].Replace('\'', ' ') + "*' OR Technique_Step_Command LIKE'*" + _commandx[2].Replace('\'', ' ') + "*'";
                                         DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
                                     }
                                     catch (Exception)
@@ -210,7 +222,7 @@ namespace BEV4.RealTime
                                 {
                                     try
                                     {
-                                        string _query = "Technique_Step_Command LIKE '*" + _commandx[1] + "*'";
+                                        string _query = "Technique_Step_Command LIKE '*" + _commandx[1].Replace('\'', ' ') + "*'";
                                         DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
                                     }
                                     catch (Exception)
@@ -230,7 +242,7 @@ namespace BEV4.RealTime
                                 {
                                     try
                                     {
-                                        string _query = "Technique_Step_Command LIKE '*" + _commandx[3] + "*' OR Technique_Step_Command LIKE'*" + _commandx[4] + "*'";
+                                        string _query = "Technique_Step_Command LIKE '*" + _commandx[3].Replace('\'', ' ') + "*' OR Technique_Step_Command LIKE'*" + _commandx[4].Replace('\'', ' ') + "*'";
                                         DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
                                     }
                                     catch (Exception)
@@ -240,7 +252,7 @@ namespace BEV4.RealTime
                                         {
                                             string tmp_query3 = _commandx[3].Split('[')[1].Split(']')[0];
                                             string tmp_query4 = _commandx[4].Split('[')[1].Split(']')[0];
-                                            string _query = "Technique_Step_Command LIKE '*" + tmp_query3 + "*' OR Technique_Step_Command LIKE'*" + tmp_query4 + "*'";
+                                            string _query = "Technique_Step_Command LIKE '*" + tmp_query3.Replace('\'', ' ') + "*' OR Technique_Step_Command LIKE'*" + tmp_query4.Replace('\'', ' ') + "*'";
                                             DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
                                         }
                                     }
@@ -254,7 +266,7 @@ namespace BEV4.RealTime
                                         if (_commandx[3].Contains('[') || _commandx[3].Contains(']'))
                                         {
                                             string tmp_query = _commandx[3].Split('[')[1].Split(']')[0];
-                                            string _query = "Technique_Step_Command LIKE '*" + tmp_query + "*'";
+                                            string _query = "Technique_Step_Command LIKE '*" + tmp_query.Replace('\'', ' ') + "*'";
                                             DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
                                         }
                                     }
@@ -271,7 +283,7 @@ namespace BEV4.RealTime
                             {
                                 try
                                 {
-                                    string _query = @"Technique_Step_Command LIKE '*" + @_commandx[3] + @"*'";
+                                    string _query = @"Technique_Step_Command LIKE '*" + @_commandx[3].Replace('\'', ' ') + @"*'";
                                     DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(@_query);
                                 }
                                 catch (Exception)
@@ -279,7 +291,7 @@ namespace BEV4.RealTime
                                     if (_commandx[3].Contains('[') || _commandx[3].Contains(']'))
                                     {
                                         string tmp_query = _commandx[3].Split('[')[1].Split(']')[0];
-                                        string _query = "Technique_Step_Command LIKE '*" + tmp_query + "*'";
+                                        string _query = "Technique_Step_Command LIKE '*" + tmp_query.Replace('\'', ' ') + "*'";
                                         DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
                                     }
                                 }
@@ -291,9 +303,9 @@ namespace BEV4.RealTime
                     for (int i = 0; i < DataTable_rows_MitreAttack_DB.Length; i++)
                     {
                         if (Form1.IsStopRealTime) break;
-                        Task.Delay(25);
+                        Thread.Sleep(25);
                         string _DetailsCommands_items = DataTable_rows_MitreAttack_DB[i][4].ToString().Substring(1);
-                      
+
                         try
                         {
                             Process_list_Arguments = Sysmon_Process_Table
@@ -310,12 +322,12 @@ namespace BEV4.RealTime
                         try
                         {
                             ///"2: [- name: Rubeus asreproast] [attack_technique: T1558.004] [      cmd.exe /c \"#{local_folder}\\#{local_executable}\" asreproast /outfile:\"#{local_f
-                             
+
                             if (!_DetailsCommands_items.Contains("    command: |]"))
                             {
                                 try
                                 {
-                                   
+
                                     attack_technique_Commands_sub_Items = DataTable_rows_MitreAttack_DB[i][4].ToString().Substring(1).Split(' ');
                                 }
                                 catch (Exception)
@@ -350,7 +362,7 @@ namespace BEV4.RealTime
                                                 if (xsub2.ToLower().Contains("%logonserver%"))
                                                 {
                                                     string logonserver = Environment.MachineName.ToLower();
-                                                    xsub2 = xsub2.Replace("%logonserver%","\\" + "\\" + logonserver.ToLower()).ToLower();
+                                                    xsub2 = xsub2.Replace("%logonserver%", "\\" + "\\" + logonserver.ToLower()).ToLower();
                                                 }
 
                                                 /// count is high if detected something like args in comandline ;) not bad code i hope ;)
@@ -358,7 +370,7 @@ namespace BEV4.RealTime
                                                 Processes_Sysmon_CommandLines_sub_Items = Args_Listitem._CommandLine.Split(' ');
                                                 string[] _ImageStr = Args_Listitem._Image.Split('\\');
                                                 string _ImageFullStr = Args_Listitem._Image;
-                                                string __ImageFile = _ImageStr[_ImageStr.Length-1];
+                                                string __ImageFile = _ImageStr[_ImageStr.Length - 1];
                                                 bool once = false;
                                                 foreach (string xitem in Processes_Sysmon_CommandLines_sub_Items)
                                                 {
@@ -373,13 +385,13 @@ namespace BEV4.RealTime
                                                         catch (Exception)
                                                         {
 
-                                                            
+
                                                         }
-                                                      
+
                                                     }
 
                                                     sub_Items_ListIndex_temp = DataTable_rows_MitreAttack_DB[i][0].ToString();
-                                                   
+
                                                     if (!_ImageFullStr.ToLower().Contains(xitem2.ToLower()) && xsub2 != "" && xsub2 != " " && xitem2 != "" && xitem2 != " "
                                                     && xitem2.ToLower() == xsub2.ToLower())
                                                     {
@@ -395,7 +407,7 @@ namespace BEV4.RealTime
                                                         Task.Delay(50);
                                                         int _DetectedxandAddedBefore = Detected.FindIndex(xx => xx == DataTable_rows_MitreAttack_DB[i][1].ToString()
                                                            + DataTable_rows_MitreAttack_DB[i][2].ToString()
-                                                           + "::Counts=" + counts.ToString()+"/"+counts2.ToString()
+                                                           + "::Counts=" + counts.ToString() + "/" + counts2.ToString()
                                                            + "sub_Items_ListIndex:" + sub_Items_ListIndex
                                                            + Args_Listitem._CommandLine);
                                                         Task.Delay(50);
@@ -432,7 +444,7 @@ namespace BEV4.RealTime
                                                             tempstruc.SubItems_ImageIndex = Args_Listitem.SubItems_ImageIndex;
                                                             tempstruc.SubItems_Name_Property = Args_Listitem.SubItems_Name_Property;
                                                             tempstruc.TechniqueID = DataTable_rows_MitreAttack_DB[i][2].ToString();
-                                                            
+
                                                             tempstruc.TechniqueID_Name = DataTable_rows_MitreAttack_DB[i][1].ToString();
                                                             tempstruc._CommandLine = Args_Listitem._CommandLine;
                                                             tempstruc._Image = Args_Listitem._Image;
@@ -442,13 +454,13 @@ namespace BEV4.RealTime
                                                             /// important to detection score
                                                             tempstruc.CheckScore = checkcount + 1;
                                                             /// important to detection
-                                                           
+
                                                             tempstruc.CheckingMitreSubItems_Index = Convert.ToInt32(DataTable_rows_MitreAttack_DB[i][0].ToString());
                                                             tempstruc.Event_Record_ID = Args_Listitem.Event_Record_ID;
 
                                                             Sysmon_Process_Table[__found] = tempstruc;
-                                                            
-                                                            Thread.Sleep(10);
+
+                                                            Task.Delay(10);
 
                                                             detected = true;
                                                             break;
@@ -472,7 +484,7 @@ namespace BEV4.RealTime
                                                                 tempstruc.SubItems_ImageIndex = Args_Listitem.SubItems_ImageIndex;
                                                                 tempstruc.SubItems_Name_Property = Args_Listitem.SubItems_Name_Property;
                                                                 tempstruc.TechniqueID = DataTable_rows_MitreAttack_DB[i][2].ToString();
-                                                                
+
                                                                 tempstruc.TechniqueID_Name = DataTable_rows_MitreAttack_DB[i][1].ToString();
                                                                 tempstruc._CommandLine = Args_Listitem._CommandLine;
                                                                 tempstruc._Image = Args_Listitem._Image;
@@ -482,12 +494,12 @@ namespace BEV4.RealTime
                                                                 /// important to detection score
                                                                 tempstruc.CheckScore = checkcount + 1;
                                                                 /// important to detection
-                                                               
+
                                                                 tempstruc.CheckingMitreSubItems_Index = Convert.ToInt32(DataTable_rows_MitreAttack_DB[i][0].ToString());
                                                                 tempstruc.Event_Record_ID = Args_Listitem.Event_Record_ID;
                                                                 Sysmon_Process_Table.Add(tempstruc);
-                                                               
-                                                                Thread.Sleep(10);
+
+                                                                Task.Delay(10);
 
                                                                 detected = true;
                                                                 break;
@@ -496,6 +508,7 @@ namespace BEV4.RealTime
                                                     }
 
                                                 }
+
                                                 d2 = DateTime.Now;
 
                                                 _ts = d2 - d1;
@@ -514,9 +527,9 @@ namespace BEV4.RealTime
                                     }
 
                                     d22 = DateTime.Now;
-                                    Thread.Sleep(1);
+                                    Thread.Sleep(5);
                                     ts = d22 - d11;
-                                                                        
+
                                     List<_TableOfSysmon_Processes> _isDetected = Sysmon_Process_Table.FindAll(X => X.IsChecked == true && X.IsDetected == true);
                                     CurrentScan = "[PID:" + Args_Listitem.PID.ToString()
                                             + "] Process: " + Args_Listitem.ProcessName_Path.Replace('\r', ' ');
@@ -538,7 +551,7 @@ namespace BEV4.RealTime
                         {
 
 
-                        }                      
+                        }
                     }
 
                     int Totalobj_Checked = Sysmon_Process_Table.FindAll(x => x.IsChecked).Count;
@@ -574,63 +587,89 @@ namespace BEV4.RealTime
             });
 
         }
-        
+
         private static async void RealtimeEventIDsMonitor_NewEventID1Raised(object sender, EventArgs e)
         {
-            EventRecord _EventRecord = ((EventRecord)sender);
-
-            if (_EventRecord != null)
+            await Task.Run(() =>
             {
-                try
+                EventRecord _EventRecord = ((EventRecord)sender);
+
+                if (_EventRecord != null)
                 {
-
-                    string[] EvtRecords_Details = _EventRecord.FormatDescription().Split('\n');
-                    int _PID = Convert.ToInt32(EvtRecords_Details[4].Split(':')[1]);
-
-                    string _Image = EvtRecords_Details[5].Substring(6);
-                    string _CommandLine = EvtRecords_Details[11].Substring(12);
-                    string _ParentCommandLine = EvtRecords_Details[22].Split(':')[1];
-                    int _CommandType = 0;
-                   
-                    if (_Image.ToLower().Contains("powershell")) _CommandType = 1; else _CommandType = 2;
-
-                    if (Sysmon_Process_Table.FindIndex(x => x.PID == _PID && x.ProcessName.ToLower() == _Image.ToLower()) == -1)
+                    try
                     {
-                        Sysmon_Process_Table.Add(new _TableOfSysmon_Processes
+
+                        string[] EvtRecords_Details = _EventRecord.FormatDescription().Split('\n');
+                        int _PID = Convert.ToInt32(EvtRecords_Details[4].Split(':')[1]);
+
+                        string _Image = EvtRecords_Details[5].Substring(6);
+                        string _CommandLine = EvtRecords_Details[11].Substring(12);
+                        string _ParentCommandLine = EvtRecords_Details[22].Split(':')[1];
+                        int _CommandType = 0;
+
+                        if (_Image.ToLower().Contains("powershell")) _CommandType = 1; else _CommandType = 2;
+
+                        if (Sysmon_Process_Table.FindIndex(x => x.PID == _PID && x.ProcessName.ToLower() == _Image.ToLower()) == -1)
                         {
-                            EventTime = Convert.ToDateTime(EvtRecords_Details[2].Substring(8)),
-                            CommandTypes = _CommandType,
-                            Description = "",
-                            PID = _PID,
-                            ProcessName = _Image,
-                            ProcessName_Path = _Image,
-                            SubItems_ImageIndex = 0,
-                            SubItems_Name_Property = "",
-                            _CommandLine = _CommandLine.ToLower(),
-                            _EventMessage = _EventRecord.FormatDescription(),
-                            _Image = _Image,
-                            _ParentCommandLine = _ParentCommandLine,
-                            AddedTime = DateTime.Now,
-                            IsChecked = false,
-                            ProcessItemsDetectedCount_Score = 0.ToString(),
-                            IsDetected = false,
-                            TechniqueID = "",
-                            TechniqueID_Name = "",
-                            CheckScore = 0,
-                            CheckingMitreSubItems_Index = 0,
-                            Event_Record_ID = Convert.ToInt64(_EventRecord.RecordId)
-                        });
+                            Sysmon_Process_Table.Add(new _TableOfSysmon_Processes
+                            {
+                                EventTime = Convert.ToDateTime(EvtRecords_Details[2].Substring(8)),
+                                CommandTypes = _CommandType,
+                                Description = "",
+                                PID = _PID,
+                                ProcessName = _Image,
+                                ProcessName_Path = _Image,
+                                SubItems_ImageIndex = 0,
+                                SubItems_Name_Property = "",
+                                _CommandLine = _CommandLine.ToLower(),
+                                _EventMessage = _EventRecord.FormatDescription(),
+                                _Image = _Image,
+                                _ParentCommandLine = _ParentCommandLine,
+                                AddedTime = DateTime.Now,
+                                IsChecked = false,
+                                ProcessItemsDetectedCount_Score = 0.ToString(),
+                                IsDetected = false,
+                                TechniqueID = "",
+                                TechniqueID_Name = "",
+                                CheckScore = 0,
+                                CheckingMitreSubItems_Index = 0,
+                                Event_Record_ID = Convert.ToInt64(_EventRecord.RecordId)
+                            });
+                        }
+
+                        if (!init)
+                        {
+                            try
+                            {
+                                /// bug fixed here ....
+                                ThreadStart __Thread_RealTimeMon = new ThreadStart(delegate
+                                {
+                                    Task.Run(() =>
+                                    {
+                                      _Scan().GetAwaiter();
+                                    });
+                                });
+                                _Thread_RealTimeMon2 = new Thread(__Thread_RealTimeMon);
+                                _Thread_RealTimeMon2.Priority = ThreadPriority.Highest;
+                                _Thread_RealTimeMon2.Start();
+
+                                //await _Scan();
+                            }
+                            catch (Exception)
+                            {
+
+
+                            }
+                        }
+
                     }
+                    catch (Exception)
+                    {
 
-                    if(!init) await _Scan();
 
+                    }
                 }
-                catch (Exception)
-                {
-
-
-                }
-            }
+            });
         }
 
         private static void EvtWatcher_EventRecordWritten(object sender, EventRecordWrittenEventArgs e)
@@ -645,5 +684,118 @@ namespace BEV4.RealTime
 
             }
         }
+
+        public static async void _RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog(object obj)
+        {
+            await _Save_New_DetectionLogs_Events_to_WinEventLog(obj);
+        }
+
+        public static async void _RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog2(object obj)
+        {
+            await _Save_New_DetectionLogs_Events_to_WinEventLog(obj, true);
+        }
+
+        public static async Task _Save_New_DetectionLogs_Events_to_WinEventLog(object Obj)
+        {
+            await Task.Run(() =>
+            {
+                try
+                {
+                    ListViewItem _items_Objects = (ListViewItem)Obj;
+                    BEV4 = new EventLog("BEV4.3", ".", "BEV_4");
+                    StringBuilder st = new StringBuilder();
+
+                    DataTable TempTable = Master_Value.MasterValueClass.table_MitreAttackTechniques;
+                    DataRow[] dts = TempTable.Select("Record_SubItemIndex = " + Convert.ToInt32(_items_Objects.SubItems[5].Text.Split(':')[0].Split('[')[1]));
+                    TechniqueId_Command_Details_DB_Index = dts[0].ItemArray[0].ToString();
+                    TechniqueId_Command_Details_DisplayName = dts[0].ItemArray[1].ToString();
+                    TechniqueId_Command_Details_TechniqueID = dts[0].ItemArray[2].ToString();
+                    TechniqueId_Command_Details_Command_Str = dts[0].ItemArray[4].ToString();
+
+                    CheckFalsePositive = "\n------------------------------"
+                        + "\n\nNote: YOU Can Check False Positive Detection via Compare \"1.Your Event CommandLine\" with \"2.Detected Technique CommandLine\".\n\n"
+                        + "TechniqueID: " + TechniqueId_Command_Details_TechniqueID + "\n"
+                        + "Technique Name: " + TechniqueId_Command_Details_DisplayName + "\n"
+                        + "1.DETECTED TECHNIQUE CommandLine ==> " + TechniqueId_Command_Details_Command_Str + "\n"
+                        + "2.YOUR EVENT CommandLine ==>" + _items_Objects.SubItems[8].Text;
+
+                    last_Detection = "[#] Time: " + _items_Objects.SubItems[1].Text + ", TechniqueID: "
+                        + _items_Objects.SubItems[2].Text
+                        + ", Technique Name: " + _items_Objects.SubItems[3].Text + " ==> Detected via Sysmon EventIDs (EID1) by BEV4.exe"
+                        + "\nPID: " + _items_Objects.SubItems[7].Text + ", Process Name: " + _items_Objects.SubItems[6].Text
+                        + "\nDetection Score: " + _items_Objects.SubItems[4].Text + "\nDB Index: " + _items_Objects.SubItems[5].Text
+                        + CheckFalsePositive
+                        + "\n\nSysmon Event_Record_Id: " + _items_Objects.SubItems[9].Text
+                        + "\nSysmon Event Message:\n" + _items_Objects.SubItems[10].Text;
+
+                    st.AppendLine(last_Detection);
+                    Task.Delay(50);
+
+                    if (last_Detection2 != last_Detection)
+                    {
+                        BEV4.WriteEntry(st.ToString(), EventLogEntryType.Warning, 2);
+                    }
+
+                    last_Detection2 = last_Detection;
+                }
+                catch (Exception ee)
+                {
+
+                }
+            });
+        }
+
+        public static async Task _Save_New_DetectionLogs_Events_to_WinEventLog(object Obj, bool IsFalsePositive)
+        {
+            await Task.Run(() =>
+            {
+                try
+                {
+                    ListViewItem _items_Objects = (ListViewItem)Obj;
+                    BEV4 = new EventLog("BEV4.3", ".", "BEV_4");
+                    StringBuilder st = new StringBuilder();
+
+                    DataTable TempTable = Master_Value.MasterValueClass.table_MitreAttackTechniques;
+                    DataRow[] dts = TempTable.Select("Record_SubItemIndex = " + Convert.ToInt32(_items_Objects.SubItems[5].Text.Split(':')[0].Split('[')[1]));
+                    TechniqueId_Command_Details_DB_Index = dts[0].ItemArray[0].ToString();
+                    TechniqueId_Command_Details_DisplayName = dts[0].ItemArray[1].ToString();
+                    TechniqueId_Command_Details_TechniqueID = dts[0].ItemArray[2].ToString();
+                    TechniqueId_Command_Details_Command_Str = dts[0].ItemArray[4].ToString();
+
+                    CheckFalsePositive = "\n------------------------------"
+                        + "\n\nNote: YOU Can Check False Positive Detection via Compare \"1.Your Event CommandLine\" with \"2.Detected Technique CommandLine\".\n\n"
+                        + "TechniqueID: " + TechniqueId_Command_Details_TechniqueID + "\n"
+                        + "Technique Name: " + TechniqueId_Command_Details_DisplayName + "\n"
+                        + "1.DETECTED TECHNIQUE CommandLine ==> " + TechniqueId_Command_Details_Command_Str + "\n"
+                        + "2.YOUR EVENT CommandLine ==>" + _items_Objects.SubItems[8].Text;
+
+                    last_Detection = "[#] Time: " + _items_Objects.SubItems[1].Text + ", TechniqueID: "
+                        + _items_Objects.SubItems[2].Text
+                        + ", Technique Name: " + _items_Objects.SubItems[3].Text + " ==> (Probably False-Positive) Detected via Sysmon EventIDs (EID1) by BEV4.exe"
+                        + "\nPID: " + _items_Objects.SubItems[7].Text + ", Process Name: " + _items_Objects.SubItems[6].Text
+                        + "\nDetection Score: " + _items_Objects.SubItems[4].Text + "\nDB Index: " + _items_Objects.SubItems[5].Text
+                        + CheckFalsePositive
+                        + "\n\nSysmon Event_Record_Id: " + _items_Objects.SubItems[9].Text
+                        + "\nSysmon Event Message:\n" + _items_Objects.SubItems[10].Text;
+
+                    st.AppendLine(last_Detection);
+                    Task.Delay(50);
+
+                    if (last_Detection2 != last_Detection)
+                    {
+                        if (IsFalsePositive)
+                            BEV4.WriteEntry(st.ToString(), EventLogEntryType.Information, 3);
+                    }
+
+                    last_Detection2 = last_Detection;
+                }
+                catch (Exception ee)
+                {
+
+                }
+            });
+        }
+
+
     }
 }
