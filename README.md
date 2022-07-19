@@ -23,7 +23,7 @@ video link : https://youtu.be/MHfGIY2IyXE?t=414
 
 
 ----------------------------------------------------------
-###  BEV4 v4.3.200.138 [Jul 19, 2022].(BEV4 All Detection now savedinto windows Eventlog Name [BEV4.3])
+###  BEV4 v4.3.200.138 [Jul 19, 2022].(BEV4 All Detection now saved into windows Eventlog Name [BEV4.3])
    ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_14.png)
 
 ###  BEV4 v4.3.194.120 [Jul 12, 2022].(BEV4 Event viewer)
