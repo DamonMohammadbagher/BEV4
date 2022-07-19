@@ -484,6 +484,8 @@ namespace BEV4.Filtering.Local
         private void FilterForm_Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Filtering_TempBinding_Local_1.Filter = "";
+            Filtering_TempBinding_Local_2.Filter = "";
+            Filtering_TempBinding_Local_3.Filter = "";
         }
     }
 }
