@@ -3,8 +3,8 @@
  BasicEventViewer v4 in may 2022 Updated for ver (.NET 4.5) , Published by Damon Mohammadbagher.
 
  ```diff 
- + last source/exe update(2) v4.3.200.138 [Jul 19, 2022]... , 
- + some bugs fixed & Real-time True/False Positive Detections saved into windows eventlog with Name: BEV4.3
+ + last source/exe update(3) v4.3.202.158 [Aug 12, 2022]... , 
+ + Null Exception Error for Events Loading fixed & some bug in Real-time monitor fixed too.
  ```
  
  BEV4 is Event Monitor tool (real-time & search) some simple things like Atomic-red-team yaml file added for test & Real time detection for some type of attack and ...
