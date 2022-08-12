@@ -20,6 +20,7 @@ using System.Diagnostics;
 
 namespace BEV4
 {
+
     public partial class Form1 : Form
     {
 
@@ -34,10 +35,12 @@ namespace BEV4
         public static System.Timers.Timer t = new System.Timers.Timer(100);
         public static System.Timers.Timer t1 = new System.Timers.Timer(5000);
         public static System.Timers.Timer t2 = new System.Timers.Timer(400);
+        public static System.Timers.Timer t3 = new System.Timers.Timer(5000);
+        public static System.Timers.Timer t4 = new System.Timers.Timer(10000);
         Mitre_Attack.MitreAttackClass mitre = new Mitre_Attack.MitreAttackClass();
         private BindingSource TempBinding_Local;
         private BindingSource TempBinding_Remote;
-        private EventRecord CastObject = null;
+        //private EventRecord CastObject = null;
         private bool init = false;
         private bool init2 = false;
         public static bool IsLocalRemote_SearchReloadFormActived = false;
@@ -50,7 +53,8 @@ namespace BEV4
         public delegate BindingSource _Core2(string str);
         public delegate void _Core1(string str);
         public delegate void _Core3(TreeNode obj);
-        public delegate void _Core0();
+        public delegate void _Core4(object s1, object s2);
+        public delegate void _Core0();       
         public static Thread _Thread_RealTimeMon;
         public static event EventHandler Save_MittreAttack_Result_1;
                 
@@ -63,11 +67,16 @@ namespace BEV4
         public List<ListViewItem> SortedList3_HighScore = new List<ListViewItem>();
         public List<ListViewItem> SortedList4_HSTruePositives = new List<ListViewItem>();
         public ListViewItem iList2 = new ListViewItem();
-        public List<string> DetectdList_Listview2 = new List<string>();
+        public List<string> DetectedList_Listview2 = new List<string>();
         public static string Textbox1Text = "";
         private static string EIDSelected = "";
         private static string TempScript = "";
         public static EventLog BEV4 = null;
+        public static string CurrentStr = "";
+        public static string CurrentStr2 = "";
+        public static bool IsSummary = false;
+        public static bool IsSummary_Details = false;       
+        
         public void Refresh_Remote_TreeNodes()
         {
             try
@@ -89,27 +98,15 @@ namespace BEV4
             {
                 try
                 {
-                    //dataGridView4.DataSource = Master_Value.MasterValueClass.RemoteBindingSource;
-
+                   
                     TempBinding_Remote.DataSource = Master_Value.MasterValueClass.table_Remoting;
                     dataGridView3.DataSource = TempBinding_Remote;
 
                     dataGridView3.Update();
                     dataGridView3.Refresh();
 
-                    //dataGridView4.Update();
-                    //dataGridView4.Refresh();
-
                     groupBox6.Text = Master_Value.MasterValueClass.Remote_Description_Groupbox6;
-
-                    // for adding properties to Array fot tab 3 (Remote)
-                    //Master_Value.MasterValueClass.PropertiesList = new string[dataGridView4.Columns.Count];
-                    //for (int i = 0; i < dataGridView4.Columns.Count; )
-                    //{
-                    //    Master_Value.MasterValueClass.PropertiesList[i] = dataGridView4.Columns[i].Name;
-                    //    i++;
-                    //}
-
+                  
                 }
                 catch (Exception err)
                 {
@@ -141,26 +138,16 @@ namespace BEV4
                 try
                 {
 
-                    //dataGridView1.DataSource = Master_Value.MasterValueClass.LocalBindingSource;
-
                     TempBinding_Local.DataSource = Master_Value.MasterValueClass.table_Local;
                     dataGridView2.DataSource = TempBinding_Local.DataSource;
 
-                    //dataGridView1.Update();
-                    //dataGridView1.Refresh();
-
                     dataGridView2.Update();
                     dataGridView2.Refresh();
-                    //dataGridView1.Visible = true;
-                    //dataGridView1.Show();
+
                     dataGridView2.Visible = true;
                     dataGridView2.Show();
 
                     groupBox6.Text = Master_Value.MasterValueClass.Local_Description_Groupbox6;
-
-                    // for adding properties to Array fot tab 3 (Local)
-                    //Master_Value.MasterValueClass.PropertiesList = new string[dataGridView1.Columns.Count];
-                    
 
                 }
                 catch (Exception err)
@@ -245,13 +232,9 @@ namespace BEV4
                     {
                         Master_Value.MasterValueClass.RemoteBindingSource.DataSource = typeof(System.Diagnostics.Eventing.Reader.EventLogRecord);
                         Master_Value.MasterValueClass.RemoteBindingSource.Clear();
-                        Master_Value.MasterValueClass.Settable_RemoteTable();
                         Master_Value.MasterValueClass.table_Remoting.Clear();
-
-                        //dataGridView3.DataSource = null;
-                        //dataGridView3.DataBindings.Clear();
-                       // dataGridView3.Rows.Clear();
-                        
+                        Master_Value.MasterValueClass.Settable_RemoteTable();
+                      
                         Master_Value.MasterValueClass.Remote_Description_Groupbox6 = "Event Messages for Event Name (" + Master_Value.MasterValueClass.ActiveNode + ") " + " , Remote System Name : " + Master_Value.MasterValueClass.Remote_Host_Name;
 
                     }
@@ -328,7 +311,7 @@ namespace BEV4
             try
             {
                 Form.CheckForIllegalCrossThreadCalls = false;
-
+                toolStripProgressBar2.AutoToolTip = true;
                 try
                 {
                    
@@ -353,6 +336,9 @@ namespace BEV4
                 t1.Enabled = false;
                 t2.Elapsed += T2_Elapsed;
                 t2.Enabled = false;
+                t3.Elapsed += T3_Elapsed;
+                t3.Enabled = false;
+                t4.Elapsed += T4_Elapsed;
                 tabControl1.SelectedIndex = 0;
                 // this.Icon = SystemIcons.Shield;
                 GC.Collect();
@@ -378,10 +364,13 @@ namespace BEV4
                
 
                 _Set_iListview_Properties(listView2, new string[] { " ","Event Time","TechniqueID", "Display Name", "Detection Score",
-                    "SubItemIndex:CheckScore","Process Name","PID","CommandLine","Event_Record_Id", "Event Message"}
+                    "DB SubItemIndex","Process Name","PID","CommandLine","EventRecord_Id", "Event Message"}
               , new int[] { 20, 130, 100, 180, 100, 140,140, 50,400,100,100 }, imageList1);
 
-                
+
+                //_Set_iListview_Properties(listView3, new string[] { " ","Event Time","TechniqueID", "Display Name", "Detection Score",
+                //    "SubItemIndex:CheckScore","Process Name","PID","CommandLine","Event_Record_Id", "Event Message"}
+                //    , new int[] { 20, 130, 100, 180, 100, 140, 140, 50, 400, 100, 100 }, imageList1);
 
                 /// event for Save MItreSearch Results_1
                 Save_MittreAttack_Result_1 += Form1_Save_MittreAttack_Result_1;
@@ -512,158 +501,441 @@ namespace BEV4
                
             }
         }
-      
-        private  void T1_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            foreach (ListViewItem item in SortedList3_HighScore)
-            {
-                if(item.SubItems[5].Text.Split(':')[0].Substring(1) == "")
-                {
 
-                }
-            }
-        }
-
-        private async void T2_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private async void T4_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+           
+            t3.Enabled = false;
+            t3.Stop();
+         
             await Task.Run(() =>
             {
                 try
                 {
-                    int counts = 0;
-                    List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes> list = new List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes>();
-                    toolStripStatusLabel6.Text = RealTime.RealtimeEventIDsMonitor.CurrentScan2;
-                    toolStripStatusLabel8.Text = RealTime.RealtimeEventIDsMonitor.CurrentScan;
-
-                    string tmp = "";
-
-                    if (RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table.Count > 0)
+                    toolStripStatusLabel10.BackColor = Color.DarkGray;
+                    if (IsSummary_Details)
                     {
-                        try
+                        foreach (ListViewItem obj in SortedList3_HighScore.OrderByDescending(x => x.SubItems[4].Text))
                         {
-                           list = RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table
-                          .OrderBy(x => x.TechniqueID_Name).Distinct()
-                          .ToList()
-                          .FindAll(x => Convert.ToInt32(x.ProcessItemsDetectedCount_Score.Split('/')[0]) >= 2)
-                          .ToList();
-                        }
-                        catch (Exception)
-                        {
-
-
-                        }
-                        if(list !=null)
-                        counts = list.Count;
-
-                        if (counts != listView2.Items.Count)
-                        {
-
-                            foreach (RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes items in list)
-                            {
-                                Task.Delay(10);
-                                toolStripStatusLabel6.Text = RealTime.RealtimeEventIDsMonitor.CurrentScan2;
-                                toolStripStatusLabel8.Text = RealTime.RealtimeEventIDsMonitor.CurrentScan;
-
-                                if (DetectdList_Listview2.FindIndex(x => x == items.ProcessName + "@" + items.PID.ToString()
-                                    + "@" + items.ProcessItemsDetectedCount_Score.ToString()
-                                    + " [" + items.CheckingMitreSubItems_Index.ToString() + ":" + items.CheckScore.ToString() + "]"
-                                    + items.TechniqueID_Name + "@" + items.TechniqueID) == -1)
-                                {
-
-                                    iList2 = new ListViewItem();
-                                    
-                                    iList2.SubItems.Add(items.EventTime.ToString());
-                                    iList2.SubItems.Add(items.TechniqueID);
-                                    iList2.SubItems.Add(items.TechniqueID_Name);
-                                    iList2.SubItems.Add(items.ProcessItemsDetectedCount_Score.ToString());
-                                    iList2.SubItems.Add("[" + items.CheckingMitreSubItems_Index.ToString() + ":" + items.CheckScore.ToString() + "]");
-                                    iList2.SubItems.Add(items.ProcessName);
-                                    iList2.SubItems.Add(items.PID.ToString());
-                                    iList2.SubItems.Add(items._CommandLine);
-                                    iList2.SubItems.Add(items.Event_Record_ID.ToString());
-                                    iList2.SubItems.Add(items._EventMessage);
-                                    iList2.Name = items._EventMessage;
-
-                                    float a = Convert.ToSingle(items.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2;
-                                    float b = Convert.ToSingle(items.ProcessItemsDetectedCount_Score.Split('/')[0]);
-
-                                    if (a == b / 2)
-                                    {
-                                        iList2.ImageIndex = 9;
-                                        if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
-                                            listView2.Items.Add(iList2).ForeColor = Color.Red;
-
-                                        SortedList4_HSTruePositives.Add(iList2);
-                                        SortedList3_HighScore.Add(iList2);
-
-                                        toolStripStatusLabel10.BackColor = Color.DarkGray;
-                                        toolStripStatusLabel10.Text = "Note: TechniqueID (" + iList2.SubItems[2].Text + ") with High Score ["
-                                            + iList2.SubItems[4].Text + "] Detected for Process"
-                                            + iList2.SubItems[6].Text.Replace('\r', ' ') + " (PID:" + iList2.SubItems[7].Text + ")";
-                                        
-                                        /// create event id 2 in BEV4.3 EventLog
-                                        RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object) iList2);
-                                    }
-                                    else
-                                    if (a < b)
-                                    {
-                                         
-                                        iList2.ImageIndex = 9;
-                                        if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
-                                            listView2.Items.Add(iList2).ForeColor = Color.DarkOrange;
-
-                                        SortedList3_HighScore.Add(iList2);
-                                        
-                                        /// create event id 2 in BEV4.3 EventLog
-                                        RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object)iList2);
-
-
-                                        //List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes> list2 = RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table;
-                                        //if (list2
-                                        // .GroupBy(x => new { x._EventMessage, x.TechniqueID, x.PID})
-                                        // .Select(s=> s.Key.PID == Convert.ToInt32(iList2.SubItems[7].Text)
-                                        //   && s.Key.TechniqueID == iList2.SubItems[1].Text).Distinct().ToList().Count <= 1)                                         
-
-                                    }
-                                    else
-                                    {
-                                        iList2.ImageIndex = 10;
-                                        if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
-                                        {
-                                            listView2.Items.Add(iList2).ForeColor = Color.Black;
-                                            
-                                            /// create event id 3 in BEV4.3 EventLog
-                                            RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog2((object)iList2);
-
-                                        }
-                                    }
-
-                                    tmp = iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text;
-                                    a = 0;
-                                    b = 0;
-                                    Task.Delay(5);                                 
-
-                                    DetectdList_Listview2.Add(items.ProcessName + "@" + items.PID.ToString()
-                                      + "@" + items.ProcessItemsDetectedCount_Score.ToString()
-                                      + " [" + items.CheckingMitreSubItems_Index.ToString() + ":" + items.CheckScore.ToString() + "]"
-                                      + items.TechniqueID_Name + "@" + items.TechniqueID);
-
-                                }
-
-                            }
-                          
-                        }
-                       
-                     
+                            string Note = "Note: TechniqueID (" + obj.SubItems[2].Text + ") with High Score ["
+                                    + obj.SubItems[4].Text.ToString() + "] Detected for Process"
+                                    + obj.SubItems[6].Text.Replace('\r', ' ') + " (PID:" + obj.SubItems[7].Text.ToString() + ")";
+                            Thread.Sleep(1500);
+                            if (Note != null && !string.IsNullOrWhiteSpace(Note) && !IsSummary)
+                                toolStripStatusLabel10.Text = Note;
+                        }                      
                     }
+
+                    IsSummary = true;
+                    IsSummary_Details = false;
+                    t3.Enabled = true;
+                    t3.Start();
+                    t4.Enabled = false;
+                    t4.Stop();
+
                 }
                 catch (Exception)
                 {
 
-
                 }
             });
+
            
+        }
+
+        private async void T3_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            await Task.Run(() =>
+            {
+                if (IsSummary)
+                {
+                    IsSummary = false;
+                    IsSummary_Details = false;
+                    t4.Enabled = false;
+                    t4.Stop();
+                }
+                else
+                {
+                    IsSummary = false;
+                    IsSummary_Details = true;
+                    t4.Enabled = true;
+                    t4.Start();
+                }
+            });
+        }
+
+        private async void RunAsync_RefreshCurrentScan(object obj1, object obj2)
+        {
+            await RefreshCurrentScan(obj1, obj2);
+        }
+
+        private async Task RefreshCurrentScan(object CurrentScan, object CurrentScan2)
+        {
+            await Task.Run(() =>
+             {
+
+                 try
+                 {
+                     Delegate _RefreshCurrentScan2 = ((MethodInvoker)delegate
+                     {
+                         try
+                         {
+
+
+                             if (!toolStripStatusLabel8.Text.Contains("Scan Finished!"))
+                             {
+
+                                 toolStripStatusLabel12.Text = "[" +
+                                 (RealTime.RealtimeEventIDsMonitor.iCounter + 1).ToString()
+                                 + " of " +
+                                 RealTime.RealtimeEventIDsMonitor.icounter_Max.ToString() + "]";
+                             }
+                         }
+                         catch (Exception)
+                         {
+
+
+                         }
+                     });
+
+                     Task.Run(() => { BeginInvoke((MethodInvoker)delegate { _RefreshCurrentScan2.DynamicInvoke(); }); }).GetAwaiter();
+                 }
+                 catch (Exception)
+                 {
+
+
+                 }
+
+                 try
+                 {
+                     Delegate _RefreshCurrentScan1 = ((MethodInvoker)delegate
+                     {
+                         try
+                         {
+                             if (!toolStripStatusLabel8.Text.Contains("Scan Finished!"))
+                             {
+                                 if (RealTime.RealtimeEventIDsMonitor.iCounter > 0)
+                                     toolStripProgressBar2.Value =
+                                         RealTime.RealtimeEventIDsMonitor.iCounter * 100
+                                         / RealTime.RealtimeEventIDsMonitor.icounter_Max;
+                             }
+                             else toolStripProgressBar2.Value = 0;
+                         }
+                         catch (Exception)
+                         {
+                             toolStripProgressBar2.Value = 0;
+                         }
+                     });
+
+                     Task.Run(() =>
+                     {
+                         BeginInvoke((MethodInvoker)delegate
+                         {
+                             try
+                             {
+                                 _RefreshCurrentScan1.DynamicInvoke();
+
+                             }
+                             catch (Exception)
+                             {
+
+
+                             }
+                         });
+
+                     }).GetAwaiter();
+
+                 }
+                 catch (Exception)
+                 {
+
+                 }
+
+                 try
+                 {
+                     Delegate _RefreshCurrentScan = ((MethodInvoker)delegate
+                     {
+                         try
+                         {
+
+                             if (CurrentScan2 != null && CurrentStr2 != CurrentScan2.ToString()
+                             && !string.IsNullOrWhiteSpace(CurrentScan2.ToString()))
+                             {
+                                 toolStripStatusLabel6.Text = CurrentScan2.ToString();
+                                 CurrentStr2 = CurrentScan2.ToString();
+                             }
+
+                             if (CurrentScan != null && CurrentStr != CurrentScan.ToString()
+                             && !string.IsNullOrWhiteSpace(CurrentScan.ToString()))
+                             {
+                                 toolStripStatusLabel8.Text = CurrentScan.ToString();
+                                 CurrentStr = CurrentScan.ToString();
+                             }
+                         }
+                         catch (Exception)
+                         {
+                          
+                         }
+                     });
+
+                     Task.Run(() => { BeginInvoke((MethodInvoker)delegate { _RefreshCurrentScan.DynamicInvoke(); }); }).GetAwaiter();
+                 }
+                 catch (Exception)
+                 {
+
+
+                 }
+
+                 Thread.Sleep(1500);
+             });
+        }
+      
+        private void T1_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+          
+        }
+
+        private async void T2_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+
+            //Delegate _RefreshCurrentScan = ((MethodInvoker)delegate
+            //{
+            //         RunAsync_RefreshCurrentScan(RealTime.RealtimeEventIDsMonitor.CurrentScan,
+            //         RealTime.RealtimeEventIDsMonitor.CurrentScan2);
+
+            //});
+
+            //System.Runtime.CompilerServices.TaskAwaiter _Task =
+            //    Task.Run(() => { _RefreshCurrentScan.DynamicInvoke(); }).GetAwaiter();
+
+            await RefreshCurrentScan(RealTime.RealtimeEventIDsMonitor.CurrentScan,
+                          RealTime.RealtimeEventIDsMonitor.CurrentScan2);
+
+            await Task.Run(() =>
+            {
+                listView2.BeginInvoke((MethodInvoker)delegate
+                 {
+                     try
+                     {
+                         int counts = 0;
+                         List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes> list =
+                        new List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes>();
+
+                         string tmp = "";
+
+                         try
+                         {
+                             toolStripStatusLabel10.BackColor = Color.DarkGray;                           
+                             if (IsSummary && !IsSummary_Details && !t4.Enabled)
+                                 toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                 + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                         }
+                         catch (Exception)
+                         {
+
+                         }
+
+
+                         if (RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table.Count > 0)
+                         {
+                             try
+                             {                               
+                                 //list = RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table
+                                 //.OrderBy(x => x.TechniqueID_Name).Distinct()
+                                 //.ToList()
+                                 //.FindAll(x => Convert.ToInt32(x.ProcessItemsDetectedCount_Score.Split('/')[0]) >= 2)
+                                 //.ToList();
+
+                                 list = RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table.FindAll(x =>
+                                       x.ProcessItemsDetectedCount_Score != "0" 
+                                    && x.ProcessItemsDetectedCount_Score != null)
+                                 .FindAll(x => Convert.ToInt32(x.ProcessItemsDetectedCount_Score.Split('/')[0]) >= 2
+                                    || Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2 <
+                                       Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[0])
+                                    || Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2 ==
+                                       Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[0]) / 2 )
+                                   .OrderBy(x => x.TechniqueID_Name).Distinct()
+                                   .ToList();
+                                                                      
+                             }
+                             catch (Exception)
+                             {
+
+                             }
+
+                             if (list != null)
+                                 counts = list.Count;
+
+                             if (counts != listView2.Items.Count)
+                             {
+                                 foreach (RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes items in list)
+                                 {
+                                     Task.Delay(20);
+
+                                     if (DetectedList_Listview2.FindIndex(x => x == items.ProcessName + "@" + items.PID.ToString()
+                                            + "@" + items.ProcessItemsDetectedCount_Score.ToString() + items.Event_Record_ID.ToString()
+                                            + " [" + items.CheckingMitreSubItems_Index.ToString() + "]"
+                                            + items.TechniqueID_Name + "@" + items.TechniqueID) == -1)
+                                     {
+
+                                         iList2 = new ListViewItem();
+
+                                         iList2.SubItems.Add(items.EventTime.ToString());
+                                         iList2.SubItems.Add(items.TechniqueID);
+                                         iList2.SubItems.Add(items.TechniqueID_Name);
+                                         iList2.SubItems.Add(items.ProcessItemsDetectedCount_Score.ToString());
+                                         iList2.SubItems.Add(items.CheckingMitreSubItems_Index.ToString());
+                                         iList2.SubItems.Add(items.ProcessName);
+                                         iList2.SubItems.Add(items.PID.ToString());
+                                         iList2.SubItems.Add(items._CommandLine);
+                                         iList2.SubItems.Add(items.Event_Record_ID.ToString());
+                                         iList2.SubItems.Add(items._EventMessage);
+                                         iList2.Name = items._EventMessage;
+
+                                         float a = Convert.ToSingle(items.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2;
+                                         float b = Convert.ToSingle(items.ProcessItemsDetectedCount_Score.Split('/')[0]);
+
+                                         try
+                                         {
+                                             toolStripStatusLabel10.BackColor = Color.DarkGray;
+
+                                       //      if (!IsSummery && !IsSummery_Details)
+                                       //      {
+                                       //          var obj = RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table.FindAll(x =>
+                                       //      x.ProcessItemsDetectedCount_Score != "0"
+                                       //   && x.ProcessItemsDetectedCount_Score != null)
+                                       //.FindAll(x => Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2 ==
+                                       //      Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[0]) / 2)
+                                       //  .OrderBy(x => x.TechniqueID_Name).Last();
+                                  
+                                       //          toolStripStatusLabel10.Text = "Note: TechniqueID (" + obj.TechniqueID + ") with High Score ["
+                                       //                 + obj.ProcessItemsDetectedCount_Score.ToString()+ "] Detected for Process"
+                                       //                 + obj.ProcessName_Path.Replace('\r', ' ') + " (PID:" + obj.PID.ToString() + ")";
+                                       //      }
+                                       //      else
+
+                                             if (IsSummary && !IsSummary_Details && !t4.Enabled)
+                                                 toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                                 + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                         }
+                                         catch (Exception)
+                                         {
+
+                                         }
+
+
+                                         if (a == b / 2)
+                                         {
+                                             iList2.ImageIndex = 9;
+                                             iList2.ForeColor = Color.Red;
+
+                                             if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
+                                             {
+                                                 listView2.Items.Add((ListViewItem)iList2.Clone());
+                                                 Thread.Sleep(10);
+                                             }
+
+                                             SortedList4_HSTruePositives.Add(iList2);
+                                             SortedList3_HighScore.Add(iList2);
+
+                                             try
+                                             {
+                                                 toolStripStatusLabel10.BackColor = Color.DarkGray;
+
+                                                 if (IsSummary && !IsSummary_Details && !t4.Enabled)
+                                                     toolStripStatusLabel10.Text = "Detection Summary: FullScore Detection: [" + SortedList4_HSTruePositives.Count.ToString()
+                                                     + "] , HighScore Detection: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                             }
+                                             catch (Exception)
+                                             {
+
+                                             }
+
+                                             /// create event id 2 in BEV4.3 EventLog
+                                             RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object)iList2);
+                                         }
+                                         else
+                                            if (a < b)
+                                         {
+
+
+                                             try
+                                             {
+                                                 toolStripStatusLabel10.BackColor = Color.DarkGray;
+
+                                                 if (IsSummary && !IsSummary_Details && !t4.Enabled)
+                                                     toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                                     + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                             }
+                                             catch (Exception)
+                                             {
+
+                                             }
+
+                                             iList2.ImageIndex = 9;
+                                             iList2.ForeColor = Color.DarkOrange;
+
+                                             if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
+                                             {
+                                                 listView2.Items.Add((ListViewItem)iList2.Clone());
+                                                 Thread.Sleep(10);
+                                             }
+
+                                             SortedList3_HighScore.Add(iList2);
+                                             /// create event id 2 in BEV4.3 EventLog
+                                             RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object)iList2);
+
+                                         }
+                                         else
+                                         {
+
+                                             try
+                                             {
+                                                 toolStripStatusLabel10.BackColor = Color.DarkGray;
+
+                                                 if (IsSummary && !IsSummary_Details && !t4.Enabled)
+                                                     toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                                     + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                             }
+                                             catch (Exception)
+                                             {
+
+                                             }
+
+                                             iList2.ImageIndex = 10;
+                                             iList2.ForeColor = Color.Black;
+
+                                             if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
+                                             {
+                                                 listView2.Items.Add((ListViewItem)iList2.Clone());
+                                                 Thread.Sleep(10);
+                                                 /// create event id 3 in BEV4.3 EventLog
+                                                 RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog2((object)iList2);
+
+                                             }
+                                         }
+
+                                         tmp = iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text;
+                                         a = 0;
+                                         b = 0;
+                                         Task.Delay(5);
+
+                                         DetectedList_Listview2.Add(items.ProcessName + "@" + items.PID.ToString()
+                                              + "@" + items.ProcessItemsDetectedCount_Score.ToString() + items.Event_Record_ID.ToString()
+                                              + " [" + items.CheckingMitreSubItems_Index.ToString() + "]"
+                                              + items.TechniqueID_Name + "@" + items.TechniqueID);
+                                     }
+                                 }
+                             }
+                         }
+                     }
+                     catch (Exception)
+                     {
+
+                     }
+                 });
+            });
+
         }
 
         private void T_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -688,10 +960,7 @@ namespace BEV4
             try
             {
                 dataGridView3.Show();
-                //dataGridView4.Show();
                 dataGridView3.Visible = true;
-                //dataGridView4.Visible = true;
-
 
                 try
                 {
@@ -701,9 +970,6 @@ namespace BEV4
                         Master_Value.MasterValueClass.RemoteBindingSource.Position = e.RowIndex;
 
                         /// fix error ;) with init
-
-                        //CastObject = ((EventRecord)Master_Value.MasterValueClass.RemoteBindingSource[e.RowIndex]);
-                        //string msg = CastObject.FormatDescription();
 
                         richTextBox1.Text = dataGridView3.Rows[e.RowIndex].Cells[3].Value.ToString();
                                                 
@@ -717,7 +983,7 @@ namespace BEV4
 
                     if (err.Message == "Index was out of range. Must be non-negative and less than the size of the collection.\r\nParameter name: index")
                     {
-                      // await Refresh_Remote_DataGrid_3and4();
+
                     }
 
 
@@ -737,11 +1003,7 @@ namespace BEV4
 
             try
             {
-                //dataGridView1.Show();
-                //dataGridView2.Show();
-                //dataGridView1.Visible = true;
-                //dataGridView2.Visible = true;
-
+               
                 try
                 {
 
@@ -751,12 +1013,8 @@ namespace BEV4
 
                         /// fix error ;) with init
 
-                        //CastObject = ((EventRecord)Master_Value.MasterValueClass.LocalBindingSource[e.RowIndex]);
-                        //string msg = CastObject.FormatDescription();
-
                         richTextBox1.Text = dataGridView2.Rows[e.RowIndex].Cells[3].Value.ToString();
                         
-
                         if (e.RowIndex == 0 && !init) init = true;
                     }
 
@@ -767,7 +1025,7 @@ namespace BEV4
 
                     if (err.Message == "Index was out of range. Must be non-negative and less than the size of the collection.\r\nParameter name: index")
                     {
-                        //  Refresh_Local_DataGrid1and2();
+                       
                     }
 
                 }
@@ -844,32 +1102,7 @@ namespace BEV4
 
 
             }
-            //try
-            //{
-            //    tabControl1.SelectedIndex = 0;
-            //    Master_Value.MasterValueClass.LocalBindingSource.Clear();
-            //    Master_Value.MasterValueClass.Settable_LocalTable();
-            //    Master_Value.MasterValueClass.table_Local.Clear();
-
-            //    dataGridView1.DataSource = null;
-            //    dataGridView2.DataSource = null;
-            //    dataGridView2.Show();
-            //    dataGridView1.Show();
-            //    /// true => force waitform2 to search event id 1 only for search CreateProcess only (Mitre attack)
-            //    IsFilteringMode_Mittre_EID1 = false;
-            //    Master_Value.MasterValueClass.ActiveNode = toolStripStatusLabel_Nodes.Text.Split('(')[0];
-            //    Master_Value.MasterValueClass.ActiveNode = Master_Value.MasterValueClass.ActiveNode.Substring(0, Master_Value.MasterValueClass.ActiveNode.Length - 1);
-            //    WaitForm2 WForm2 = new WaitForm2();
-            //    WForm2.ShowDialog();
-
-            //    Master_Value.MasterValueClass.Local_Description_Groupbox6 = "Event Messages for Event Name (" + Master_Value.MasterValueClass.ActiveNode + ") " + " , Local System";
-            //    Refresh_Local_DataGrid1and2();
-            //}
-            //catch (Exception err)
-            //{
-
-
-            //}
+            
         }
 
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
@@ -987,10 +1220,6 @@ namespace BEV4
                     _T8__CoreScanThread.Priority = ThreadPriority.Highest;
                     _T8__CoreScanThread.Start();
 
-
-                    //toolStripStatusLabel_Nodes.Text = e.Node.Text + " (" + e.Node.ToolTipText + ")";
-                    //Master_Value.MasterValueClass.ActiveNode_Count = e.Node.ToolTipText;
-                    //Master_Value.MasterValueClass.ActiveNode = e.Node.Text;
                 }
 
             }
@@ -1015,14 +1244,9 @@ namespace BEV4
                         groupBox6.Text = "Event Messages";
                     }
 
-                    dataGridView3.Hide();
-                    //dataGridView4.Hide();
-                    //dataGridView1.Show();
+                    dataGridView3.Hide();                   
                     dataGridView2.Show();
-                    //dataGridView1.Visible = true;
                     dataGridView2.Visible = true;
-
-                    //dataGridView1.DataSource = Master_Value.MasterValueClass.LocalBindingSource;                    
                     dataGridView2.DataSource = TempBinding_Local;
 
 
@@ -1035,14 +1259,9 @@ namespace BEV4
                         groupBox6.Text = "Event Messages";
                     }
 
-                    //dataGridView1.Hide();
                     dataGridView2.Hide();
                     dataGridView3.Show();
-                    //dataGridView4.Show();
                     dataGridView3.Visible = true;
-                    //dataGridView4.Visible = true;
-
-                    //dataGridView4.DataSource = Master_Value.MasterValueClass.RemoteBindingSource;                    
                     dataGridView3.DataSource = TempBinding_Remote;
 
                 }
@@ -1063,17 +1282,15 @@ namespace BEV4
                 {
 
                     Master_Value.MasterValueClass.LocalBindingSource.Clear();
-                    Master_Value.MasterValueClass.Settable_LocalTable();
                     Master_Value.MasterValueClass.table_Local.Clear();
-                    
+                    Master_Value.MasterValueClass.Settable_LocalTable();
+                                       
                     dataGridView2.DataSource = null;
                     dataGridView2.Rows.Clear();
-                    //dataGridView2.DataBindings.Clear();
-                    //dataGridView2.Rows.Clear();
-
-                    dataGridView2.Show();
                     
+                    dataGridView2.Show();                    
                     dataGridView2.Visible = true;
+
                     richTextBox1.Text = "";
                     /// true => force waitform2 to search event id 1 only for search CreateProcess only (Mitre attack)
                     IsFilteringMode_Mittre_EID1 = false;
@@ -1173,7 +1390,6 @@ namespace BEV4
 
 
         }
-
       
         private void saveThisEventToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1378,7 +1594,6 @@ namespace BEV4
             try
             {                               
                 Filtering.Local.PropertiesForm_Local.Properties_Datarow_Local_1 = ((System.Data.DataRowView)TempBinding_Local.List[dataGridView2.CurrentRow.Index]);
-                // Filtering.Local.PropertiesForm_Local.Properties_Datarow_Local_2 = ((EventLogRecord)Master_Value.MasterValueClass.LocalBindingSource.List[dataGridView1.CurrentRow.Index]);
                 Filtering.Local.PropertiesForm_Local PFM = new Filtering.Local.PropertiesForm_Local();
                 PFM.ShowDialog();
             }
@@ -1394,7 +1609,6 @@ namespace BEV4
             try
             {
                 Filtering.Remote.PropertiesForm_Remote.Properties_Datarow_Remote_1 = ((System.Data.DataRowView)TempBinding_Remote.List[dataGridView3.CurrentRow.Index]);
-               // Filtering.Remote.PropertiesForm_Remote.Properties_Datarow_Remote_2 = ((EventLogRecord)Master_Value.MasterValueClass.RemoteBindingSource.List[dataGridView4.CurrentRow.Index]);
                 Filtering.Remote.PropertiesForm_Remote PFM = new Filtering.Remote.PropertiesForm_Remote();
                 PFM.ShowDialog();
             }
@@ -1426,8 +1640,6 @@ namespace BEV4
         {
             try
             {
-                //Filtering.Remote.PropertiesForm_Remote.Properties_Datarow_Remote_1 = ((System.Data.DataRowView)TempBinding_Remote.List[dataGridView4.CurrentRow.Index]);
-                //Filtering.Remote.PropertiesForm_Remote.Properties_Datarow_Remote_2 = ((EventLogRecord)Master_Value.MasterValueClass.RemoteBindingSource.List[dataGridView4.CurrentRow.Index]);
                 Filtering.Remote.PropertiesForm_Remote PFM = new Filtering.Remote.PropertiesForm_Remote();
                 PFM.ShowDialog();
             }
@@ -1478,7 +1690,6 @@ namespace BEV4
                     {
 
                         Filtering.Local.PropertiesForm_Local.Properties_Datarow_Local_1 = ((System.Data.DataRowView)TempBinding_Local.List[dataGridView2.CurrentRow.Index]);
-                        //Filtering.Local.PropertiesForm_Local.Properties_Datarow_Local_2 = ((EventLogRecord)Master_Value.MasterValueClass.LocalBindingSource.List[dataGridView2.CurrentRow.Index]);
                         Filtering.Local.PropertiesForm_Local PFM = new Filtering.Local.PropertiesForm_Local();
                         PFM.ShowDialog();
                     }
@@ -1493,7 +1704,6 @@ namespace BEV4
                     try
                     {
                         Filtering.Remote.PropertiesForm_Remote.Properties_Datarow_Remote_1 = ((System.Data.DataRowView)TempBinding_Remote.List[dataGridView3.CurrentRow.Index]);
-                        //Filtering.Remote.PropertiesForm_Remote.Properties_Datarow_Remote_2 = ((EventLogRecord)Master_Value.MasterValueClass.RemoteBindingSource.List[dataGridView3.CurrentRow.Index]);
                         Filtering.Remote.PropertiesForm_Remote PFM = new Filtering.Remote.PropertiesForm_Remote();
                         PFM.ShowDialog();
                     }
@@ -1555,8 +1765,6 @@ namespace BEV4
                 string _name = listBox6.SelectedItems[0].ToString().Split('[')[0];
                 toolStripStatusLabel11.Text= "SelectedItem: " + _name;
                 _name = _name.Substring(0, _name.Length - 2);
-
-                //Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items _list_details = mitre.MitreAttackList.Find(x => x.Name.Substring(7) == _name);
                 
                 string dump;
                 using (StreamReader sw = new StreamReader(toolStripStatusLabel1.Text.Substring(10)))
@@ -1632,9 +1840,7 @@ namespace BEV4
 
                 if (error_invalid_techid_loaded)
                 {
-                    //button1.Enabled = false;
-                    //button13.Enabled = false;
-                    
+                  
                     MessageBox.Show("Invlid CommandType Detected\nSelected Technique ID has one more SubItems which is not for Windows!?");
                 }
                 else
@@ -1748,7 +1954,6 @@ namespace BEV4
                     string _now = now.ToString("hh.mm.ss");
                     string[] TechniqueFileStr = TechniqueFile.Split('\\');
                     string FileName = TechniqueFileStr[TechniqueFileStr.Length - 1];
-                    //string save_xml_file_name = FileName.Split('.')[0] + "_SearchResults_" + "(" + DisplayName.Substring(1) + ")" + _now + ".xml";
                     string save_xml_file_name = FileName + "_SearchResults_" + "(" + DisplayName.Substring(1) + ")" + _now + ".xml";
 
                     using (StreamWriter xml = new StreamWriter(save_xml_file_name))
@@ -1811,13 +2016,13 @@ namespace BEV4
 
                         }
                     }
+
                     dataGridView6.DataSource = TempTable_For_Tab2_saveresult_All;
                     listView1.Items.AddRange(SortedList2.ToList().OrderBy(x => x.SubItems[0].Text).ToArray());
                     DateTime now = DateTime.Now;
                     string _now = now.ToString("hh.mm.ss");
                     string[] TechniqueFileStr = TechniqueFile.Split('\\');
                     string FileName = TechniqueFileStr[TechniqueFileStr.Length - 1];
-                    //string save_xml_file_name = FileName.Split('.')[0] + "_SearchAllResults_" + "(" + TechID + ")" + _now + ".xml";
                     string save_xml_file_name = FileName + "_SearchAllResults_" + "(" + TechID + ")" + _now + ".xml";
                     using (StreamWriter xml = new StreamWriter(save_xml_file_name))
                     {
@@ -2160,6 +2365,7 @@ namespace BEV4
             {
                 MessageBox.Show("Mitre Attack Real-time Monitor is ON,\nPlease First Stop this then you can use Search.");
             }
+
             //button2.Enabled = true;
 
            // PowerShell ps = PowerShell.Create();
@@ -2184,6 +2390,9 @@ namespace BEV4
                         IsStopRealTime = true;
                         _Thread_RealTimeMon.Abort();
 
+                        if (RealTime.RealtimeEventIDsMonitor._Thread_RealTimeMon2.IsAlive)
+                            RealTime.RealtimeEventIDsMonitor._Thread_RealTimeMon2.Abort();
+
                     }
                 }
                 catch (Exception)
@@ -2196,13 +2405,7 @@ namespace BEV4
                 stopMonitorToolStripMenuItem.Checked = false;
                 IsRealTimeOn = true;
                 IsStopRealTime = false;
-
-                //ThreadStart __Thread_RealTimeMon = new ThreadStart(delegate
-                //{
-                //    RealTime.RealtimeEventIDsMonitor.RunMonitor_Sysmon();
-                //});
-                // _Thread_RealTimeMon = new Thread(__Thread_RealTimeMon);
-
+                
                 _Thread_RealTimeMon = new Thread(new ThreadStart(RealTime.RealtimeEventIDsMonitor.RunMonitor_Sysmon));
                 _Thread_RealTimeMon.Priority = ThreadPriority.Highest;                
                 _Thread_RealTimeMon.Start();
@@ -2211,6 +2414,8 @@ namespace BEV4
                 t2.Start();
                 t1.Enabled = true;
                 t1.Start();
+                t3.Enabled = true;
+                t3.Start();
                 toolStripStatusLabel9.Text = "| MITRE ATTACK Realtime Monitor is on";
             }
             else
@@ -2223,7 +2428,13 @@ namespace BEV4
         {
             try
             {
-                if (_Thread_RealTimeMon.IsAlive) { IsStopRealTime = true; _Thread_RealTimeMon.Abort(); }
+                if (_Thread_RealTimeMon.IsAlive)
+                {
+                    IsStopRealTime = true; _Thread_RealTimeMon.Abort();                   
+                }
+
+                if (RealTime.RealtimeEventIDsMonitor._Thread_RealTimeMon2.IsAlive)
+                    RealTime.RealtimeEventIDsMonitor._Thread_RealTimeMon2.Abort();
             }
             catch (Exception)
             {
@@ -2236,6 +2447,13 @@ namespace BEV4
             toolStripStatusLabel9.Text = "| MITRE ATTACK Realtime Monitor is off";
             t2.Enabled = false;
             t2.Stop();
+            t3.Enabled = false;
+            t3.Stop();
+            ////foreach (RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes item 
+            ////    in RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table_history.ToArray())
+            ////{
+            ////    listView3.Items.Add()
+            ////}
         }
 
         public async void Listview2_indexchange_info()
@@ -2277,7 +2495,7 @@ namespace BEV4
                     + "\nTechnique ID: " + _TechniqueID
                     + "\nTechnique ID Name: " + _TechniqueID_Name
                     + "\nDetection Score: " + _DetectionScore
-                    + "\nSubItems_Index/Checking_Score: " + _TechniqueID_SubItems_IndexData
+                    + "\nDB SubItems_Index: " + _TechniqueID_SubItems_IndexData
                     + "\nDetected Process Name: " + _ProcessName
                     + "\nDetected Process ID: " + _ProcessName_ID
                     + "\nDetected Process CommandLine: " + _ProcessCommandLine
@@ -2286,7 +2504,7 @@ namespace BEV4
                 try
                 {
                     DataTable TempTable = Master_Value.MasterValueClass.table_MitreAttackTechniques;
-                    DataRow[] dts = TempTable.Select("Record_SubItemIndex = " + Convert.ToInt32(_TechniqueID_SubItems_IndexData.Split(':')[0].Split('[')[1]));
+                    DataRow[] dts = TempTable.Select("Record_SubItemIndex = " + Convert.ToInt32(_TechniqueID_SubItems_IndexData));
                     string TechniqueId_Command_Details_DB_Index = dts[0].ItemArray[0].ToString();
                     string TechniqueId_Command_Details_DisplayName = dts[0].ItemArray[1].ToString();
                     string TechniqueId_Command_Details_TechniqueID = dts[0].ItemArray[2].ToString();
@@ -2609,22 +2827,54 @@ namespace BEV4
 
         private void ToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            //////GC.Collect();
-            Master_Value.MasterValueClass.ActiveNode = toolStripStatusLabel_Nodes.Text.Split('(')[0];
-            Master_Value.MasterValueClass.ActiveNode = Master_Value.MasterValueClass.ActiveNode.Substring(0, Master_Value.MasterValueClass.ActiveNode.Length - 1);
-           
-            Local_Forms.Powershell.Local_PSSearch LF = new Local_Forms.Powershell.Local_PSSearch();            
-            LF.ShowDialog();
+         
+            try
+            {
+
+                Master_Value.MasterValueClass.ActiveNode = toolStripStatusLabel_Nodes.Text.Split('(')[0];
+                Master_Value.MasterValueClass.ActiveNode = Master_Value.MasterValueClass.ActiveNode.Substring(0, Master_Value.MasterValueClass.ActiveNode.Length - 1);
+                if (Master_Value.MasterValueClass.ActiveNode.ToLower() != "windows logs"
+                    && Master_Value.MasterValueClass.ActiveNode.ToLower() != "application and services logs"
+                    && Master_Value.MasterValueClass.ActiveNode.ToLower() != "microsoft")
+                {
+                    Local_Forms.Powershell.Local_PSSearch LF = new Local_Forms.Powershell.Local_PSSearch();
+                    LF.ShowDialog();
+                }
+                else
+                { MessageBox.Show("Please First Select Your Target EventLog Name", "Error!"); }
+
+            }
+            catch (Exception)
+            {
+
+                MessageBox.Show("Please First Select Your Target EventLog Name", "Error!");
+            }
+
         }
 
         private void ReloadExportToHTMLCSVViaPowershellToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //////GC.Collect();
-            Master_Value.MasterValueClass.ActiveNode = toolStripStatusLabel_Nodes.Text.Split('(')[0];
-            Master_Value.MasterValueClass.ActiveNode = Master_Value.MasterValueClass.ActiveNode.Substring(0, Master_Value.MasterValueClass.ActiveNode.Length - 1);
+            try
+            {
 
-            Local_Forms.Powershell.Local_PSSearch LF = new Local_Forms.Powershell.Local_PSSearch();
-            LF.ShowDialog();
+                Master_Value.MasterValueClass.ActiveNode = toolStripStatusLabel_Nodes.Text.Split('(')[0];
+                Master_Value.MasterValueClass.ActiveNode = Master_Value.MasterValueClass.ActiveNode.Substring(0, Master_Value.MasterValueClass.ActiveNode.Length - 1);
+                if (Master_Value.MasterValueClass.ActiveNode.ToLower() != "windows logs"
+                    && Master_Value.MasterValueClass.ActiveNode.ToLower() != "application and services logs"
+                    && Master_Value.MasterValueClass.ActiveNode.ToLower() != "microsoft")
+                {
+                    Local_Forms.Powershell.Local_PSSearch LF = new Local_Forms.Powershell.Local_PSSearch();
+                    LF.ShowDialog();
+                }
+                else
+                { MessageBox.Show("Please First Select Your Target EventLog Name", "Error!"); }
+
+            }
+            catch (Exception)
+            {
+
+                MessageBox.Show("Please First Select Your Target EventLog Name", "Error!");
+            }
         }
 
         private void DataGridView8_RowEnter(object sender, DataGridViewCellEventArgs e)
