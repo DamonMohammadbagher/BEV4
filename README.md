@@ -11,7 +11,6 @@
  
  Note: in this code some yaml files (atomic-red-team yaml files) added to source code as "Database" for Search in Sysmon Event ID 1 Logs (real-time & search), so this code was for test and my database in this code is not good for detect everything but my tests was very good for some attack detection (real-time) , this code was for test and you can make your own code for real-time scanning Sysmon Events or ETW Events for Attack Detections based on Windows Events or ETW/Sysmon Events etc. you can load and watch my database in this tool and in this code All command prompts or powershell scripts will detect based on Yaml files information etc. (if you want use this database you really should change some rows in this DataBase, i did not change any thing in these yaml files , i just test them for some detection tests and results was good!).
  
-
 Video1 for BEV4: https://www.youtube.com/watch?v=imU82TApG2k
 
 Video2 for BEV4: https://www.youtube.com/watch?v=Hera3z1T5mI
