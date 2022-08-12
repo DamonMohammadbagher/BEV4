@@ -76,6 +76,8 @@ namespace BEV4.RealTime
             private Int32 _CheckingMitreSubItems_Index;
             public Int32 CheckingMitreSubItems_Index { get { return _CheckingMitreSubItems_Index; } set { _CheckingMitreSubItems_Index = value; } }
 
+            private Int32 _Scan_Loops;
+            public Int32 Scan_Loops { get { return _Scan_Loops; } set { _Scan_Loops = value; } }
         }
 
         public static List<_TableOfSysmon_Processes> Sysmon_Process_Table = new List<_TableOfSysmon_Processes>();
@@ -99,6 +101,8 @@ namespace BEV4.RealTime
         public static string TechniqueId_Command_Details_Command_Str = "";
         public static string CheckFalsePositive = "";
         public static Thread _Thread_RealTimeMon2;
+        public static Int32 iCounter = 0;
+        public static Int32 icounter_Max = 0;
 
 
         public static void RunMonitor_Sysmon()
@@ -134,7 +138,6 @@ namespace BEV4.RealTime
             init = true;
             await Task.Run(() =>
             {
-                //Thread.CurrentThread.Priority = ThreadPriority.Highest;
                 ///365: [- name: Enumeration for PuTTY Credentials in Registry] [attack_technique: T1552.002] [      reg query HKCU\Software\SimonTatham\PuTTY\Sessions /t REG_SZ /s]
                 string[] attack_technique_Commands_sub_Items = null;
                 string[] Processes_Sysmon_CommandLines_sub_Items = null;
@@ -158,318 +161,334 @@ namespace BEV4.RealTime
                 DateTime d22 = DateTime.Now;
                 DateTime _xdt = DateTime.Now;
                 DateTime _xdt2 = DateTime.Now;
+                DateTime starttime = DateTime.Now;
+                DateTime endtime = DateTime.Now;
                 DataTable TempTable_MitreAttackTechniques = Master_Value.MasterValueClass.table_MitreAttackTechniques;
                 DataRow[] DataTable_rows_MitreAttack_DB = new DataRow[1];
                 string[] _commandx = null;
+                bool error = false;
 
                 while (true)
                 {
+                    error = false;
                     if (Form1.IsStopRealTime) break;
 
                     DataTable_rows_MitreAttack_DB = new DataRow[1];
                     Thread.Sleep(2000);
                     _xdt = DateTime.Now;
 
+                    //List<_TableOfSysmon_Processes> Process_list_Arguments =
+                    //Sysmon_Process_Table.FindAll(X => X.IsChecked == false || X.CheckScore < 5);
+
                     List<_TableOfSysmon_Processes> Process_list_Arguments =
-                    Sysmon_Process_Table.FindAll(X => X.IsChecked == false || X.CheckScore < 5);
+                    Sysmon_Process_Table.FindAll(X => (X.IsChecked == false || X.CheckScore < 5) && X.Scan_Loops <= 3);
 
                     List<_TableOfSysmon_Processes> Filtered_Process_list_Arguments = Sysmon_Process_Table
                           .GroupBy(x => x.PID).Select(x => x.First()).ToList()
-                          .FindAll(X => X.IsChecked == false || X.CheckScore < 5);
+                          .FindAll(X => (X.IsChecked == false || X.CheckScore < 5) && X.Scan_Loops <= 3);
 
                     foreach (_TableOfSysmon_Processes item in Filtered_Process_list_Arguments)
                     {
                         _commandx = item._CommandLine.Split(' ');
-                    }
 
-                    Task.Delay(250);
+                        Thread.Sleep(200);
+                        //Task.Delay(250);
 
-                    if (_commandx != null)
-                    {
-                        if (!_commandx[1].ToLower().Contains("powershell"))
+                        if (_commandx != null)
                         {
-                            if (Form1._IsScanningFast)
+                            starttime = DateTime.Now;
+                            if (!_commandx[1].ToLower().Contains("powershell"))
                             {
-                                try
+                                if (Form1._IsScanningFast)
                                 {
-                                    string _query = "Technique_Step_Command LIKE '*" + _commandx[1].Replace('\'', ' ') + "*'";
-                                    DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
+                                    try
+                                    {
+                                        DataTable_rows_MitreAttack_DB = new DataRow[1];
+                                        string _query = "Technique_Step_Command LIKE '*" + _commandx[1].Replace('\'', ' ') + "*'";
+
+                                        DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query.Replace('\"', ' '));
+                                        if (_query.Replace('\"', ' ') == "Technique_Step_Command LIKE '**'") error = true;
+                                    }
+                                    catch (Exception)
+                                    {
+
+                                    }
+
                                 }
-                                catch (Exception)
+                                else
                                 {
+                                    if (_commandx.Length >= 3)
+                                    {
+                                        try
+                                        {
+                                            DataTable_rows_MitreAttack_DB = new DataRow[1];
+                                            string _query = "Technique_Step_Command LIKE '*" + _commandx[1].Replace('\'', ' ') + "*' OR Technique_Step_Command LIKE'*" + _commandx[2].Replace('\'', ' ') + "*'";
 
+                                            DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query.Replace('\"', ' '));
+                                            if (_query.Replace('\"', ' ').Contains("Technique_Step_Command LIKE '**'")) error = true;
+                                        }
+                                        catch (Exception)
+                                        {
 
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        try
+                                        {
+                                            DataTable_rows_MitreAttack_DB = new DataRow[1];
+                                            string _query = "Technique_Step_Command LIKE '*" + _commandx[1].Replace('\'', ' ') + "*'";
+
+                                            DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query.Replace('\"', ' '));
+                                            if (_query.Replace('\"', ' ') == "Technique_Step_Command LIKE '**'") error = true;
+                                        }
+                                        catch (Exception)
+                                        {
+
+                                        }
+
+                                    }
                                 }
-
                             }
                             else
                             {
-                                if (_commandx.Length >= 3)
+                                if (!Form1._IsScanningFast)
                                 {
-                                    try
+                                    if (_commandx.Length >= 5)
                                     {
-                                        string _query = "Technique_Step_Command LIKE '*" + _commandx[1].Replace('\'', ' ') + "*' OR Technique_Step_Command LIKE'*" + _commandx[2].Replace('\'', ' ') + "*'";
-                                        DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
-                                    }
-                                    catch (Exception)
-                                    {
-
-
-                                    }
-
-                                }
-                                else
-                                {
-                                    try
-                                    {
-                                        string _query = "Technique_Step_Command LIKE '*" + _commandx[1].Replace('\'', ' ') + "*'";
-                                        DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
-                                    }
-                                    catch (Exception)
-                                    {
-
-
-                                    }
-
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (!Form1._IsScanningFast)
-                            {
-                                if (_commandx.Length >= 5)
-                                {
-                                    try
-                                    {
-                                        string _query = "Technique_Step_Command LIKE '*" + _commandx[3].Replace('\'', ' ') + "*' OR Technique_Step_Command LIKE'*" + _commandx[4].Replace('\'', ' ') + "*'";
-                                        DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
-                                    }
-                                    catch (Exception)
-                                    {
-                                        if (_commandx[3].Contains('[') || _commandx[3].Contains(']')
-                                        || _commandx[4].Contains('[') || _commandx[4].Contains(']'))
+                                        try
                                         {
-                                            string tmp_query3 = _commandx[3].Split('[')[1].Split(']')[0];
-                                            string tmp_query4 = _commandx[4].Split('[')[1].Split(']')[0];
-                                            string _query = "Technique_Step_Command LIKE '*" + tmp_query3.Replace('\'', ' ') + "*' OR Technique_Step_Command LIKE'*" + tmp_query4.Replace('\'', ' ') + "*'";
-                                            DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
-                                        }
-                                    }
-                                    finally { }
+                                            DataTable_rows_MitreAttack_DB = new DataRow[1];
+                                            string _query = "Technique_Step_Command LIKE '*" + _commandx[3].Replace('\'', ' ') + "*' OR Technique_Step_Command LIKE'*" + _commandx[4].Replace('\'', ' ') + "*'";
 
+                                            DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query.Replace('\"', ' '));
+                                            if (_query.Replace('\"', ' ').Contains("Technique_Step_Command LIKE '**'")) error = true;
+                                        }
+                                        catch (Exception)
+                                        {
+                                            if (_commandx[3].Contains('[') || _commandx[3].Contains(']')
+                                            || _commandx[4].Contains('[') || _commandx[4].Contains(']'))
+                                            {
+                                                DataTable_rows_MitreAttack_DB = new DataRow[1];
+                                                string tmp_query3 = _commandx[3].Split('[')[1].Split(']')[0];
+                                                string tmp_query4 = _commandx[4].Split('[')[1].Split(']')[0];
+                                                string _query = "Technique_Step_Command LIKE '*" + tmp_query3.Replace('\'', ' ') + "*' OR Technique_Step_Command LIKE'*" + tmp_query4.Replace('\'', ' ') + "*'";
+
+                                                DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query.Replace('\"', ' '));
+                                                if (_query.Replace('\"', ' ').Contains("Technique_Step_Command LIKE '**'")) error = true;
+                                            }
+                                        }
+                                        finally { }
+
+                                    }
+                                    else
+                                    {
+                                        try
+                                        {
+                                            if (_commandx[3].Contains('[') || _commandx[3].Contains(']'))
+                                            {
+                                                DataTable_rows_MitreAttack_DB = new DataRow[1];
+                                                string tmp_query = _commandx[3].Split('[')[1].Split(']')[0];
+                                                string _query = "Technique_Step_Command LIKE '*" + tmp_query.Replace('\'', ' ') + "*'";
+
+                                                DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query.Replace('\"', ' '));
+                                                if (_query.Replace('\"', ' ') == "Technique_Step_Command LIKE '**'") error = true;
+                                            }
+                                        }
+                                        catch (Exception)
+                                        {
+
+                                        }
+                                        finally { }
+
+                                    }
                                 }
                                 else
                                 {
                                     try
+                                    {
+                                        DataTable_rows_MitreAttack_DB = new DataRow[1];
+                                        string _query = @"Technique_Step_Command LIKE '*" + @_commandx[3].Replace('\'', ' ') + @"*'";
+
+                                        DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(@_query.Replace('\"', ' '));
+                                        if (_query.Replace('\"', ' ') == "Technique_Step_Command LIKE '**'") error = true;
+                                    }
+                                    catch (Exception)
                                     {
                                         if (_commandx[3].Contains('[') || _commandx[3].Contains(']'))
                                         {
+                                            DataTable_rows_MitreAttack_DB = new DataRow[1];
                                             string tmp_query = _commandx[3].Split('[')[1].Split(']')[0];
                                             string _query = "Technique_Step_Command LIKE '*" + tmp_query.Replace('\'', ' ') + "*'";
-                                            DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
+
+                                            DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query.Replace('\"', ' '));
+                                            if (_query.Replace('\"', ' ') == "Technique_Step_Command LIKE '**'") error = true;
                                         }
+                                    }
+
+                                }
+                            }
+                        }
+
+                        if (error)
+                        {
+                            string _query = "Technique_Step_Command LIKE '" + "Bingo_Error" + "'";
+                            DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
+                            error = false;
+                        }
+
+                        icounter_Max = DataTable_rows_MitreAttack_DB.Length;
+
+                        for (int i = 0; i < DataTable_rows_MitreAttack_DB.Length; i++)
+                        {
+
+                            //if (error) break;
+
+                            if (Form1.IsStopRealTime) break;
+
+                            if (!Form1._IsScanningFast)
+                                Thread.Sleep(50);
+
+                            if (Form1._IsScanningFast)
+                                Thread.Sleep(10);
+
+                            string _DetailsCommands_items = DataTable_rows_MitreAttack_DB[i][4].ToString().Substring(1);
+                            iCounter = i;
+                            try
+                            {
+                                Process_list_Arguments = Sysmon_Process_Table
+                               .GroupBy(x => x.PID).Select(x => x.First()).ToList()
+                               .FindAll(X => (X.IsChecked == false || X.CheckScore < 5) && X.Scan_Loops <= 3);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
+
+                            counts2 = 0;
+
+                            try
+                            {
+                                ///"2: [- name: Rubeus asreproast] [attack_technique: T1558.004] [      cmd.exe /c \"#{local_folder}\\#{local_executable}\" asreproast /outfile:\"#{local_f
+
+                                if (!_DetailsCommands_items.Contains("    command: |]"))
+                                {
+                                    try
+                                    {
+                                        attack_technique_Commands_sub_Items = DataTable_rows_MitreAttack_DB[i][4].ToString().Substring(1).Split(' ');
                                     }
                                     catch (Exception)
                                     {
 
-
                                     }
-                                    finally { }
 
-                                }
-                            }
-                            else
-                            {
-                                try
-                                {
-                                    string _query = @"Technique_Step_Command LIKE '*" + @_commandx[3].Replace('\'', ' ') + @"*'";
-                                    DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(@_query);
-                                }
-                                catch (Exception)
-                                {
-                                    if (_commandx[3].Contains('[') || _commandx[3].Contains(']'))
+                                    foreach (_TableOfSysmon_Processes Args_Listitem in Process_list_Arguments)
                                     {
-                                        string tmp_query = _commandx[3].Split('[')[1].Split(']')[0];
-                                        string _query = "Technique_Step_Command LIKE '*" + tmp_query.Replace('\'', ' ') + "*'";
-                                        DataTable_rows_MitreAttack_DB = TempTable_MitreAttackTechniques.Select(_query);
-                                    }
-                                }
+                                        if (Form1.IsStopRealTime) break;
+                                        d11 = DateTime.Now;
 
-                            }
-                        }
-                    }
+                                        if (!Form1._IsScanningFast)
+                                            Thread.Sleep(55);
 
-                    for (int i = 0; i < DataTable_rows_MitreAttack_DB.Length; i++)
-                    {
-                        if (Form1.IsStopRealTime) break;
-                        Thread.Sleep(25);
-                        string _DetailsCommands_items = DataTable_rows_MitreAttack_DB[i][4].ToString().Substring(1);
+                                        if (Form1._IsScanningFast)
+                                            Thread.Sleep(25);
 
-                        try
-                        {
-                            Process_list_Arguments = Sysmon_Process_Table
-                           .GroupBy(x => x.PID).Select(x => x.First()).ToList()
-                           .FindAll(X => X.IsChecked == false || X.CheckScore < 5);
-                        }
-                        catch (Exception)
-                        {
-
-                        }
-
-                        counts2 = 0;
-
-                        try
-                        {
-                            ///"2: [- name: Rubeus asreproast] [attack_technique: T1558.004] [      cmd.exe /c \"#{local_folder}\\#{local_executable}\" asreproast /outfile:\"#{local_f
-
-                            if (!_DetailsCommands_items.Contains("    command: |]"))
-                            {
-                                try
-                                {
-
-                                    attack_technique_Commands_sub_Items = DataTable_rows_MitreAttack_DB[i][4].ToString().Substring(1).Split(' ');
-                                }
-                                catch (Exception)
-                                {
-
-
-                                }
-
-                                foreach (_TableOfSysmon_Processes Args_Listitem in Process_list_Arguments)
-                                {
-                                    if (Form1.IsStopRealTime) break;
-                                    d11 = DateTime.Now;
-                                    Thread.Sleep(20);
-                                    jump = 0;
-                                    foreach (string xsub in attack_technique_Commands_sub_Items)
-                                    {
-                                        /// count2 is number of attack_technique_Commands_sub_Items which is not blank
-                                        counts2 = attack_technique_Commands_sub_Items.Length - 6;
-
-                                        d1 = DateTime.Now;
-                                        if (jump >= 5)
+                                        jump = 0;
+                                        foreach (string xsub in attack_technique_Commands_sub_Items)
                                         {
-                                            if (xsub != "" && xsub != " ")
+                                            /// count2 is number of attack_technique_Commands_sub_Items which is not blank
+                                            counts2 = attack_technique_Commands_sub_Items.Length - 6;
+                                            //Thread.Sleep(5);
+                                            d1 = DateTime.Now;
+                                            if (jump >= 5)
                                             {
-
-                                                xsub2 = xsub;
-                                                if (xsub.Contains('\r'))
+                                                if (xsub != "" && xsub != " " && xsub != "\r")
                                                 {
-                                                    xsub2 = xsub.Split('\r')[0];
-                                                    xsub2 = xsub2.Substring(0, xsub2.Length - 1);
-                                                }
-                                                if (xsub2.ToLower().Contains("%logonserver%"))
-                                                {
-                                                    string logonserver = Environment.MachineName.ToLower();
-                                                    xsub2 = xsub2.Replace("%logonserver%", "\\" + "\\" + logonserver.ToLower()).ToLower();
-                                                }
 
-                                                /// count is high if detected something like args in comandline ;) not bad code i hope ;)
-
-                                                Processes_Sysmon_CommandLines_sub_Items = Args_Listitem._CommandLine.Split(' ');
-                                                string[] _ImageStr = Args_Listitem._Image.Split('\\');
-                                                string _ImageFullStr = Args_Listitem._Image;
-                                                string __ImageFile = _ImageStr[_ImageStr.Length - 1];
-                                                bool once = false;
-                                                foreach (string xitem in Processes_Sysmon_CommandLines_sub_Items)
-                                                {
-                                                    if (Form1.IsStopRealTime) break;
-                                                    xitem2 = xitem;
-                                                    if (xitem.Contains('\r'))
+                                                    xsub2 = xsub;
+                                                    if (xsub.Contains('\r'))
                                                     {
                                                         try
                                                         {
-                                                            xitem2 = xitem.Split('\r')[0];
+                                                            xsub2 = xsub.Split('\r')[0];
+                                                            xsub2 = xsub2.Substring(0, xsub2.Length - 1);
                                                         }
-                                                        catch (Exception)
+                                                        catch (Exception ee)
                                                         {
-
 
                                                         }
 
                                                     }
-
-                                                    sub_Items_ListIndex_temp = DataTable_rows_MitreAttack_DB[i][0].ToString();
-
-                                                    if (!_ImageFullStr.ToLower().Contains(xitem2.ToLower()) && xsub2 != "" && xsub2 != " " && xitem2 != "" && xitem2 != " "
-                                                    && xitem2.ToLower() == xsub2.ToLower())
+                                                    if (xsub2.ToLower().Contains("%logonserver%"))
                                                     {
+                                                        string logonserver = Environment.MachineName.ToLower();
+                                                        xsub2 = xsub2.Replace("%logonserver%", "\\" + "\\" + logonserver.ToLower()).ToLower();
+                                                    }
 
-                                                        counts++;
+                                                    /// count is high if detected something like args in comandline ;) not bad code i hope ;)
 
-                                                        /// count os 4 =>        1394: [- name: Bypass UAC using Event Viewer (cmd)] [attack_technique: T1548.002] [      reg.exe add hkcu\software\classes\mscfile\shell\open\command /ve /d
-                                                        /// count could be 5 =>  1409: [- name: Bypass UAC using Fodhelper] [attack_technique: T1548.002] [      reg.exe add hkcu\software\classes\ms-settings\shell\open\command /ve /d
-
-                                                        ///1937: [- name: Set Arbitrary Binary as Screensaver] [attack_technique: T1546.002] [      reg.exe add "HK
-                                                        sub_Items_ListIndex = DataTable_rows_MitreAttack_DB[i][0].ToString();
-                                                        sub_Items_ListIndex_temp = sub_Items_ListIndex;
-                                                        Task.Delay(50);
-                                                        int _DetectedxandAddedBefore = Detected.FindIndex(xx => xx == DataTable_rows_MitreAttack_DB[i][1].ToString()
-                                                           + DataTable_rows_MitreAttack_DB[i][2].ToString()
-                                                           + "::Counts=" + counts.ToString() + "/" + counts2.ToString()
-                                                           + "sub_Items_ListIndex:" + sub_Items_ListIndex
-                                                           + Args_Listitem._CommandLine);
-                                                        Task.Delay(50);
-                                                        if (_DetectedxandAddedBefore == -1)
+                                                    Processes_Sysmon_CommandLines_sub_Items = Args_Listitem._CommandLine.Split(' ');
+                                                    string[] _ImageStr = Args_Listitem._Image.Split('\\');
+                                                    string _ImageFullStr = Args_Listitem._Image;
+                                                    string __ImageFile = _ImageStr[_ImageStr.Length - 1];
+                                                    bool once = false;
+                                                    foreach (string xitem in Processes_Sysmon_CommandLines_sub_Items)
+                                                    {
+                                                        if (Form1.IsStopRealTime) break;
+                                                        xitem2 = xitem;
+                                                        if (xitem.Contains('\r'))
                                                         {
-                                                            Detected.Add(DataTable_rows_MitreAttack_DB[i][1].ToString()
+                                                            try
+                                                            {
+                                                                xitem2 = xitem.Split('\r')[0];
+                                                            }
+                                                            catch (Exception)
+                                                            {
+
+                                                            }
+
+                                                        }
+
+                                                        sub_Items_ListIndex_temp = DataTable_rows_MitreAttack_DB[i][0].ToString();
+
+                                                        if (!_ImageFullStr.ToLower().Contains(xitem2.ToLower()) && xsub2 != "" && xsub2 != " " && xitem2 != "" && xitem2 != " "
+                                                        && xitem2.ToLower() == xsub2.ToLower())
+                                                        {
+                                                            counts++;
+
+                                                            /// count os 4 =>        1394: [- name: Bypass UAC using Event Viewer (cmd)] [attack_technique: T1548.002] [      reg.exe add hkcu\software\classes\mscfile\shell\open\command /ve /d
+                                                            /// count could be 5 =>  1409: [- name: Bypass UAC using Fodhelper] [attack_technique: T1548.002] [      reg.exe add hkcu\software\classes\ms-settings\shell\open\command /ve /d
+
+                                                            ///1937: [- name: Set Arbitrary Binary as Screensaver] [attack_technique: T1546.002] [      reg.exe add "HK
+                                                            sub_Items_ListIndex = DataTable_rows_MitreAttack_DB[i][0].ToString();
+                                                            sub_Items_ListIndex_temp = sub_Items_ListIndex;
+                                                            Task.Delay(50);
+                                                            int _DetectedxandAddedBefore = Detected.FindIndex(xx => xx == DataTable_rows_MitreAttack_DB[i][1].ToString()
                                                                + DataTable_rows_MitreAttack_DB[i][2].ToString()
                                                                + "::Counts=" + counts.ToString() + "/" + counts2.ToString()
                                                                + "sub_Items_ListIndex:" + sub_Items_ListIndex
                                                                + Args_Listitem._CommandLine);
-                                                        }
-                                                        Task.Delay(50);
-                                                        int __found = Sysmon_Process_Table.FindIndex(x =>
-                                                        x._Image == Args_Listitem._Image
-                                                        && x.PID == Args_Listitem.PID
-                                                        && x.CheckingMitreSubItems_Index == Convert.ToInt32(DataTable_rows_MitreAttack_DB[i][0].ToString()));
-                                                        //&& x.CheckingMitreSubItems_Index == Convert.ToInt32(sub_Items_ListIndex));
-                                                        Task.Delay(50);
-
-                                                        if (__found != -1 && _DetectedxandAddedBefore == -1)
-                                                        {
-
-                                                            _TableOfSysmon_Processes tempstruc = new _TableOfSysmon_Processes();
-                                                            tempstruc.AddedTime = Args_Listitem.AddedTime;
-                                                            tempstruc.CommandTypes = Args_Listitem.CommandTypes;
-                                                            tempstruc.Description = Args_Listitem.Description;
-                                                            tempstruc.EventTime = Args_Listitem.EventTime;
-                                                            tempstruc.IsChecked = true;
-                                                            tempstruc.IsDetected = true;
-                                                            tempstruc.PID = Args_Listitem.PID;
-                                                            tempstruc.ProcessItemsDetectedCount_Score = counts.ToString() + "/" + counts2.ToString();
-                                                            tempstruc.ProcessName = Args_Listitem.ProcessName;
-                                                            tempstruc.ProcessName_Path = Args_Listitem.ProcessName_Path;
-                                                            tempstruc.SubItems_ImageIndex = Args_Listitem.SubItems_ImageIndex;
-                                                            tempstruc.SubItems_Name_Property = Args_Listitem.SubItems_Name_Property;
-                                                            tempstruc.TechniqueID = DataTable_rows_MitreAttack_DB[i][2].ToString();
-
-                                                            tempstruc.TechniqueID_Name = DataTable_rows_MitreAttack_DB[i][1].ToString();
-                                                            tempstruc._CommandLine = Args_Listitem._CommandLine;
-                                                            tempstruc._Image = Args_Listitem._Image;
-                                                            tempstruc._ParentCommandLine = Args_Listitem._ParentCommandLine;
-                                                            tempstruc._EventMessage = Args_Listitem._EventMessage;
-                                                            int checkcount = Sysmon_Process_Table[__found].CheckScore;
-                                                            /// important to detection score
-                                                            tempstruc.CheckScore = checkcount + 1;
-                                                            /// important to detection
-
-                                                            tempstruc.CheckingMitreSubItems_Index = Convert.ToInt32(DataTable_rows_MitreAttack_DB[i][0].ToString());
-                                                            tempstruc.Event_Record_ID = Args_Listitem.Event_Record_ID;
-
-                                                            Sysmon_Process_Table[__found] = tempstruc;
-
-                                                            Task.Delay(10);
-
-                                                            detected = true;
-                                                            break;
-                                                        }
-                                                        else
-                                                        {
                                                             Task.Delay(50);
                                                             if (_DetectedxandAddedBefore == -1)
                                                             {
+                                                                Detected.Add(DataTable_rows_MitreAttack_DB[i][1].ToString()
+                                                                   + DataTable_rows_MitreAttack_DB[i][2].ToString()
+                                                                   + "::Counts=" + counts.ToString() + "/" + counts2.ToString()
+                                                                   + "sub_Items_ListIndex:" + sub_Items_ListIndex
+                                                                   + Args_Listitem._CommandLine);
+                                                            }
+                                                            Task.Delay(50);
+                                                            int __found = Sysmon_Process_Table.FindIndex(x =>
+                                                            x._Image == Args_Listitem._Image
+                                                            && x.PID == Args_Listitem.PID
+                                                            && x.CheckingMitreSubItems_Index == Convert.ToInt32(DataTable_rows_MitreAttack_DB[i][0].ToString()));
+                                                            //&& x.CheckingMitreSubItems_Index == Convert.ToInt32(sub_Items_ListIndex));
+                                                            Task.Delay(50);
+
+                                                            if (__found != -1 /*&& _DetectedxandAddedBefore == -1*/)
+                                                            {
+
                                                                 _TableOfSysmon_Processes tempstruc = new _TableOfSysmon_Processes();
                                                                 tempstruc.AddedTime = Args_Listitem.AddedTime;
                                                                 tempstruc.CommandTypes = Args_Listitem.CommandTypes;
@@ -490,67 +509,114 @@ namespace BEV4.RealTime
                                                                 tempstruc._Image = Args_Listitem._Image;
                                                                 tempstruc._ParentCommandLine = Args_Listitem._ParentCommandLine;
                                                                 tempstruc._EventMessage = Args_Listitem._EventMessage;
-                                                                int checkcount = 0;
+                                                                int checkcount = Sysmon_Process_Table[__found].CheckScore;
                                                                 /// important to detection score
                                                                 tempstruc.CheckScore = checkcount + 1;
                                                                 /// important to detection
 
                                                                 tempstruc.CheckingMitreSubItems_Index = Convert.ToInt32(DataTable_rows_MitreAttack_DB[i][0].ToString());
                                                                 tempstruc.Event_Record_ID = Args_Listitem.Event_Record_ID;
-                                                                Sysmon_Process_Table.Add(tempstruc);
+
+                                                                int __loops = Sysmon_Process_Table[__found].Scan_Loops;
+                                                                tempstruc.Scan_Loops = __loops + 1;
+
+                                                                Sysmon_Process_Table[__found] = tempstruc;
 
                                                                 Task.Delay(10);
 
                                                                 detected = true;
                                                                 break;
                                                             }
+                                                            else
+                                                            {
+                                                                Task.Delay(50);
+                                                                if (_DetectedxandAddedBefore == -1)
+                                                                {
+                                                                    _TableOfSysmon_Processes tempstruc = new _TableOfSysmon_Processes();
+                                                                    tempstruc.AddedTime = Args_Listitem.AddedTime;
+                                                                    tempstruc.CommandTypes = Args_Listitem.CommandTypes;
+                                                                    tempstruc.Description = Args_Listitem.Description;
+                                                                    tempstruc.EventTime = Args_Listitem.EventTime;
+                                                                    tempstruc.IsChecked = true;
+                                                                    tempstruc.IsDetected = true;
+                                                                    tempstruc.PID = Args_Listitem.PID;
+                                                                    tempstruc.ProcessItemsDetectedCount_Score = counts.ToString() + "/" + counts2.ToString();
+                                                                    tempstruc.ProcessName = Args_Listitem.ProcessName;
+                                                                    tempstruc.ProcessName_Path = Args_Listitem.ProcessName_Path;
+                                                                    tempstruc.SubItems_ImageIndex = Args_Listitem.SubItems_ImageIndex;
+                                                                    tempstruc.SubItems_Name_Property = Args_Listitem.SubItems_Name_Property;
+                                                                    tempstruc.TechniqueID = DataTable_rows_MitreAttack_DB[i][2].ToString();
+
+                                                                    tempstruc.TechniqueID_Name = DataTable_rows_MitreAttack_DB[i][1].ToString();
+                                                                    tempstruc._CommandLine = Args_Listitem._CommandLine;
+                                                                    tempstruc._Image = Args_Listitem._Image;
+                                                                    tempstruc._ParentCommandLine = Args_Listitem._ParentCommandLine;
+                                                                    tempstruc._EventMessage = Args_Listitem._EventMessage;
+                                                                    int checkcount = 0;
+                                                                    /// important to detection score
+                                                                    tempstruc.CheckScore = checkcount + 1;
+                                                                    /// important to detection
+
+                                                                    tempstruc.CheckingMitreSubItems_Index = Convert.ToInt32(DataTable_rows_MitreAttack_DB[i][0].ToString());
+                                                                    tempstruc.Event_Record_ID = Args_Listitem.Event_Record_ID;
+
+                                                                    int __loops = 0;
+                                                                    tempstruc.Scan_Loops = __loops + 1;
+
+                                                                    Sysmon_Process_Table.Add(tempstruc);
+
+                                                                    Task.Delay(10);
+
+                                                                    detected = true;
+                                                                    break;
+                                                                }
+                                                            }
                                                         }
+
                                                     }
 
+                                                    d2 = DateTime.Now;
+
+                                                    _ts = d2 - d1;
+
+                                                    List<_TableOfSysmon_Processes> _Detected = Sysmon_Process_Table.FindAll(X => X.IsChecked == true && X.IsDetected == true);
+                                                    CurrentScan = "[PID:" + Args_Listitem.PID.ToString()
+                                                    + "] Process: " + Args_Listitem.ProcessName_Path.Replace('\r', ' ');
+                                                    CurrentScan2 = "[Detected/Total Objects: " + _Detected.Count.ToString() + "/" + Sysmon_Process_Table.Count.ToString() + "]"
+                                                  + "[sub_Items_ListIndex:" + DataTable_rows_MitreAttack_DB[i][0].ToString() + "]" + "[Scanning TechniqueID:"
+                                                  + DataTable_rows_MitreAttack_DB[i][2].ToString() + "]" +
+                                                  " [SubItems Scanned in: " + _ts.TotalMilliseconds.ToString() + "ms]";
+
                                                 }
-
-                                                d2 = DateTime.Now;
-
-                                                _ts = d2 - d1;
-
-                                                List<_TableOfSysmon_Processes> _Detected = Sysmon_Process_Table.FindAll(X => X.IsChecked == true && X.IsDetected == true);
-                                                CurrentScan = "[PID:" + Args_Listitem.PID.ToString()
-                                                + "] Process: " + Args_Listitem.ProcessName_Path.Replace('\r', ' ');
-                                                CurrentScan2 = "[Detected/Total Objects: " + _Detected.Count.ToString() + "/" + Sysmon_Process_Table.Count.ToString() + "]"
-                                              + "[sub_Items_ListIndex:" + DataTable_rows_MitreAttack_DB[i][0].ToString() + "]" + "[Scanning TechniqueID:"
-                                              + DataTable_rows_MitreAttack_DB[i][2].ToString() + "]" +
-                                              " [SubItems Scanned in: " + _ts.TotalMilliseconds.ToString() + "Milliseconds]";
-
                                             }
+                                            jump++;
                                         }
-                                        jump++;
+
+                                        d22 = DateTime.Now;
+                                        Thread.Sleep(5);
+                                        ts = d22 - d11;
+
+                                        List<_TableOfSysmon_Processes> _isDetected = Sysmon_Process_Table.FindAll(X => X.IsChecked == true && X.IsDetected == true);
+                                        CurrentScan = "[PID:" + Args_Listitem.PID.ToString()
+                                                + "] Process: " + Args_Listitem.ProcessName_Path.Replace('\r', ' ');
+                                        CurrentScan2 = "[Detected/Total Objects: " + _isDetected.Count.ToString() + "/" + Sysmon_Process_Table.Count.ToString() + "]"
+                                      + "[sub_Items_ListIndex:" + DataTable_rows_MitreAttack_DB[i][0].ToString() + "]" + "[Scanning TechniqueID:"
+                                      + DataTable_rows_MitreAttack_DB[i][2].ToString() + "]"
+                                      + " [Scanned in: " + ts.Minutes.ToString().Split('.')[0] + ":" + ts.Seconds.ToString() + ":" + ts.Milliseconds.ToString() + "ms]";
+
+                                        if (detected) { counts2 = 0; counts = 0; detected = false; };
+                                        counts = 0;
+                                        counts2 = 0;                                        
+
                                     }
-
-                                    d22 = DateTime.Now;
-                                    Thread.Sleep(5);
-                                    ts = d22 - d11;
-
-                                    List<_TableOfSysmon_Processes> _isDetected = Sysmon_Process_Table.FindAll(X => X.IsChecked == true && X.IsDetected == true);
-                                    CurrentScan = "[PID:" + Args_Listitem.PID.ToString()
-                                            + "] Process: " + Args_Listitem.ProcessName_Path.Replace('\r', ' ');
-                                    CurrentScan2 = "[Detected/Total Objects: " + _isDetected.Count.ToString() + "/" + Sysmon_Process_Table.Count.ToString() + "]"
-                                  + "[sub_Items_ListIndex:" + DataTable_rows_MitreAttack_DB[i][0].ToString() + "]" + "[Scanning TechniqueID:"
-                                  + DataTable_rows_MitreAttack_DB[i][2].ToString() + "]"
-                                  + " [Scanned in: " + ts.Minutes.ToString().Split('.')[0] + ":" + ts.Seconds.ToString() + ":" + ts.Milliseconds.ToString() + "Milliseconds]";
-
-
-                                    if (detected) { counts2 = 0; counts = 0; detected = false; };
-                                    counts = 0;
-                                    counts2 = 0;
-
+                                    
                                 }
+                    
+                            }
+                            catch (Exception)
+                            {
 
                             }
-                        }
-                        catch (Exception)
-                        {
-
-
                         }
                     }
 
@@ -564,26 +630,62 @@ namespace BEV4.RealTime
                         + Totalobj_Checked + "][Detected Objects: " + Totalobj_Detected.ToString() + "]";
                     }
 
-                    if (loop >= 2)
+                    
+                    if (loop > 2)
                     {
+                        endtime = DateTime.Now;
+                        TimeSpan __ts = endtime - starttime;
+
                         for (int i = 0; i < _commandx.Length; i++)
                         {
                             _commandx[i] = "";
                         }
-                        CurrentScan = "Scan Finished!" + " , Waiting for New Process....";
+
+                        if (__ts.TotalMilliseconds != 0.0 && loop == 2)
+                            CurrentScan = "Scan Finished! in [" + __ts.TotalSeconds.ToString() + " Seconds]" + " , Waiting for New Process....";
+                        else
+                            CurrentScan = "Scan Finished!" + " , Waiting for New Process....";
+
+                        ////try
+                        ////{
+                        ////    Sysmon_Process_Table_history.AddRange(Sysmon_Process_Table.ToArray());
+                        ////}
+                        ////catch (Exception)
+                        ////{
+
+                        ////}                                                                    
+
                         Task.Delay(1500);
-                        Sysmon_Process_Table.RemoveAll(X => X.IsChecked == false || X.CheckScore < 5 || X.IsChecked == true);
+
+                        //Sysmon_Process_Table.RemoveAll(X => 
+                        //(X.IsChecked == false || X.CheckScore < 5 || X.IsChecked == true));
+
+                        Sysmon_Process_Table.RemoveAll(X =>
+                        X.IsChecked == false || X.CheckScore < 5 || X.IsChecked == true || X.Scan_Loops >= 2);
                         Detected.RemoveAll(x => x.Length > 0);
                         loop = 1;
                     }
                     else
                     {
-                        CurrentScan = "Loop: " + loop.ToString() + "/2 , Scan Finished! Starting Next Loop!";
+                        endtime = DateTime.Now;
+                        TimeSpan __ts = endtime - starttime;
+                        CurrentScan = "Loop: " + loop.ToString() + "/2 , Scan Finished! in ["
+                        + __ts.TotalSeconds.ToString() + " Seconds]" + ", Starting Next Loop!";
+
+                        if (loop >= 2)
+                        {
+                            CurrentScan = "Loop: " + loop.ToString() + "/2 , Scan Finished! in ["
+                            + __ts.TotalSeconds.ToString() + " Seconds]" + ", Waiting for New Process....";
+
+                            starttime = DateTime.Now;
+                        }
                     }
 
                     loop++;
 
                 }
+
+
             });
 
         }
@@ -633,7 +735,8 @@ namespace BEV4.RealTime
                                 TechniqueID_Name = "",
                                 CheckScore = 0,
                                 CheckingMitreSubItems_Index = 0,
-                                Event_Record_ID = Convert.ToInt64(_EventRecord.RecordId)
+                                Event_Record_ID = Convert.ToInt64(_EventRecord.RecordId),
+                                Scan_Loops = 0
                             });
                         }
 
@@ -646,8 +749,9 @@ namespace BEV4.RealTime
                                 {
                                     Task.Run(() =>
                                     {
-                                      _Scan().GetAwaiter();
+                                        System.Runtime.CompilerServices.TaskAwaiter _Task = _Scan().GetAwaiter();
                                     });
+
                                 });
                                 _Thread_RealTimeMon2 = new Thread(__Thread_RealTimeMon);
                                 _Thread_RealTimeMon2.Priority = ThreadPriority.Highest;
@@ -706,7 +810,7 @@ namespace BEV4.RealTime
                     StringBuilder st = new StringBuilder();
 
                     DataTable TempTable = Master_Value.MasterValueClass.table_MitreAttackTechniques;
-                    DataRow[] dts = TempTable.Select("Record_SubItemIndex = " + Convert.ToInt32(_items_Objects.SubItems[5].Text.Split(':')[0].Split('[')[1]));
+                    DataRow[] dts = TempTable.Select("Record_SubItemIndex = " + Convert.ToInt32(_items_Objects.SubItems[5].Text));
                     TechniqueId_Command_Details_DB_Index = dts[0].ItemArray[0].ToString();
                     TechniqueId_Command_Details_DisplayName = dts[0].ItemArray[1].ToString();
                     TechniqueId_Command_Details_TechniqueID = dts[0].ItemArray[2].ToString();
@@ -756,7 +860,7 @@ namespace BEV4.RealTime
                     StringBuilder st = new StringBuilder();
 
                     DataTable TempTable = Master_Value.MasterValueClass.table_MitreAttackTechniques;
-                    DataRow[] dts = TempTable.Select("Record_SubItemIndex = " + Convert.ToInt32(_items_Objects.SubItems[5].Text.Split(':')[0].Split('[')[1]));
+                    DataRow[] dts = TempTable.Select("Record_SubItemIndex = " + Convert.ToInt32(_items_Objects.SubItems[5].Text));
                     TechniqueId_Command_Details_DB_Index = dts[0].ItemArray[0].ToString();
                     TechniqueId_Command_Details_DisplayName = dts[0].ItemArray[1].ToString();
                     TechniqueId_Command_Details_TechniqueID = dts[0].ItemArray[2].ToString();
