@@ -64,7 +64,7 @@ namespace BEV4
         public static bool IsFilteringMode_Mittre_EID1 = false;
         public List<ListViewItem> SortedList1 = new List<ListViewItem>();
         public List<ListViewItem> SortedList2 = new List<ListViewItem>();
-        public List<ListViewItem> SortedList3_HighScore = new List<ListViewItem>();
+        public static List<ListViewItem> SortedList3_HighScore = new List<ListViewItem>();
         public List<ListViewItem> SortedList4_HSTruePositives = new List<ListViewItem>();
         public ListViewItem iList2 = new ListViewItem();
         public List<string> DetectedList_Listview2 = new List<string>();
@@ -580,8 +580,6 @@ namespace BEV4
                      {
                          try
                          {
-
-
                              if (!toolStripStatusLabel8.Text.Contains("Scan Finished!"))
                              {
 
@@ -754,7 +752,7 @@ namespace BEV4
                                        Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[0])
                                     || Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2 ==
                                        Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[0]) / 2 )
-                                   .OrderBy(x => x.TechniqueID_Name).Distinct()
+                                   //.OrderBy(x => x.TechniqueID_Name)
                                    .ToList();
                                                                       
                              }

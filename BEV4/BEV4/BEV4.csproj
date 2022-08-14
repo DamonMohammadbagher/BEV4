@@ -166,6 +166,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Local Forms\Powershell\Local_PSSearch.resx">
       <DependentUpon>Local_PSSearch.cs</DependentUpon>
