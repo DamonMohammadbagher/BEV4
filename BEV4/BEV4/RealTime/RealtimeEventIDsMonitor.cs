@@ -755,7 +755,7 @@ namespace BEV4.RealTime
                         if (FoundHistoryItem != null)
                         {
                             /// this event raised before with same commanlines args so without scanning will add to Detected Process
-                            /// this code was for avoid from scanning dublicate commandlines events which means
+                            /// this code was for avoid from scanning Duplicate commandlines events which means
                             /// we have two events with two eventRecordID also with two different PID but both are 
                             /// have same CommandLines Args also Same ProcessName_Image
                             
