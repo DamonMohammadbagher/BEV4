@@ -78,7 +78,15 @@ namespace BEV4.RealTime
 
             private Int32 _Scan_Loops;
             public Int32 Scan_Loops { get { return _Scan_Loops; } set { _Scan_Loops = value; } }
+
+            //private Int64 _Scan_UID;
+            //public  Int64 Scan_UID { get { return _Scan_UID; } set { _Scan_UID = value; } }
         }
+
+        /// <summary>
+        ///  Scan_ID 1 record a
+        ///  
+        /// </summary>
 
         public static List<_TableOfSysmon_Processes> Sysmon_Process_Table = new List<_TableOfSysmon_Processes>();
         public static List<_TableOfSysmon_Processes> Sysmon_Process_Table_history = new List<_TableOfSysmon_Processes>();
@@ -103,7 +111,7 @@ namespace BEV4.RealTime
         public static Thread _Thread_RealTimeMon2;
         public static Int32 iCounter = 0;
         public static Int32 icounter_Max = 0;
-
+        //public static Int64 _ScanUIDs = 0;
 
         public static void RunMonitor_Sysmon()
         {
@@ -167,6 +175,7 @@ namespace BEV4.RealTime
                 DataRow[] DataTable_rows_MitreAttack_DB = new DataRow[1];
                 string[] _commandx = null;
                 bool error = false;
+                //Int64 Current_ScanID = _ScanUIDs;
 
                 while (true)
                 {
@@ -357,9 +366,17 @@ namespace BEV4.RealTime
                             iCounter = i;
                             try
                             {
+                                /// 1 old
+                                // Process_list_Arguments = Sysmon_Process_Table
+                                //.GroupBy(x => x.PID).Select(x => x.First()).ToList()
+                                //.FindAll(X => (X.IsChecked == false || X.CheckScore < 5) && X.Scan_Loops <= 3);
+
+                                /// 2 current
                                 Process_list_Arguments = Sysmon_Process_Table
-                               .GroupBy(x => x.PID).Select(x => x.First()).ToList()
-                               .FindAll(X => (X.IsChecked == false || X.CheckScore < 5) && X.Scan_Loops <= 3);
+                               .FindAll(X => (X.IsChecked == false || X.CheckScore < 5) && X.Scan_Loops <= 3)
+                               .GroupBy(x => x.PID).Select(x => x.First()).ToList();
+
+
                             }
                             catch (Exception)
                             {
@@ -432,7 +449,7 @@ namespace BEV4.RealTime
                                                     string[] _ImageStr = Args_Listitem._Image.Split('\\');
                                                     string _ImageFullStr = Args_Listitem._Image;
                                                     string __ImageFile = _ImageStr[_ImageStr.Length - 1];
-                                                    bool once = false;
+                                                    
                                                     foreach (string xitem in Processes_Sysmon_CommandLines_sub_Items)
                                                     {
                                                         if (Form1.IsStopRealTime) break;
@@ -660,10 +677,19 @@ namespace BEV4.RealTime
                         //Sysmon_Process_Table.RemoveAll(X => 
                         //(X.IsChecked == false || X.CheckScore < 5 || X.IsChecked == true));
 
-                        Sysmon_Process_Table.RemoveAll(X =>
-                        X.IsChecked == false || X.CheckScore < 5 || X.IsChecked == true || X.Scan_Loops >= 2);
+                        //Sysmon_Process_Table.RemoveAll(X =>
+                        //X.IsChecked == false || X.CheckScore < 5 || X.IsChecked == true || X.Scan_Loops >= 2);
+
+                        Sysmon_Process_Table.RemoveAll(X => X.CheckScore < 5 || X.Scan_Loops > 3);
+
+                        /// bugs here
+                        //Sysmon_Process_Table.RemoveAll(X => (X.CheckingMitreSubItems_Index != 0 && X.Scan_Loops > 3) 
+                        //|| (X.CheckingMitreSubItems_Index == 0 && X.Scan_Loops > 3));
+
                         Detected.RemoveAll(x => x.Length > 0);
                         loop = 1;
+
+                        //Current_ScanID = _ScanUIDs + 1;
                     }
                     else
                     {
@@ -709,10 +735,30 @@ namespace BEV4.RealTime
                         string _ParentCommandLine = EvtRecords_Details[22].Split(':')[1];
                         int _CommandType = 0;
 
-                        if (_Image.ToLower().Contains("powershell")) _CommandType = 1; else _CommandType = 2;
-
-                        if (Sysmon_Process_Table.FindIndex(x => x.PID == _PID && x.ProcessName.ToLower() == _Image.ToLower()) == -1)
+                        /// Check Detection History 
+                        /// Find New Event in History to avoid Search Again for Duplicate/Same Events (Same CommandLines etc.)
+                        
+                        ListViewItem FoundHistoryItem = null;
+                        try
                         {
+                            FoundHistoryItem = Form1.SortedList3_HighScore.Find(x =>
+                               x.SubItems[6].Text.ToLower() == _Image.ToLower()
+                            && x.SubItems[8].Text.ToLower().Contains(_CommandLine.ToLower())
+                            && x.SubItems[8].Text.Split(' ').Length == _CommandLine.Split(' ').Length);
+                        }
+                        catch (Exception)
+                        {
+
+                            //throw;
+                        }
+
+                        if (FoundHistoryItem != null)
+                        {
+                            /// this event raised before with same commanlines args so without scanning will add to Detected Process
+                            /// this code was for avoid from scanning dublicate commandlines events which means
+                            /// we have two events with two eventRecordID also with two different PID but both are 
+                            /// have same CommandLines Args also Same ProcessName_Image
+                            
                             Sysmon_Process_Table.Add(new _TableOfSysmon_Processes
                             {
                                 EventTime = Convert.ToDateTime(EvtRecords_Details[2].Substring(8)),
@@ -728,18 +774,51 @@ namespace BEV4.RealTime
                                 _Image = _Image,
                                 _ParentCommandLine = _ParentCommandLine,
                                 AddedTime = DateTime.Now,
-                                IsChecked = false,
-                                ProcessItemsDetectedCount_Score = 0.ToString(),
-                                IsDetected = false,
-                                TechniqueID = "",
-                                TechniqueID_Name = "",
-                                CheckScore = 0,
-                                CheckingMitreSubItems_Index = 0,
+                                IsChecked = true,
+                                ProcessItemsDetectedCount_Score = FoundHistoryItem.SubItems[4].Text,
+                                IsDetected = true,
+                                TechniqueID = FoundHistoryItem.SubItems[2].Text,
+                                TechniqueID_Name = FoundHistoryItem.SubItems[3].Text,
+                                CheckScore = Convert.ToInt32(FoundHistoryItem.SubItems[4].Text.Split('/')[0]),
+                                CheckingMitreSubItems_Index = Convert.ToInt32(FoundHistoryItem.SubItems[5].Text),
                                 Event_Record_ID = Convert.ToInt64(_EventRecord.RecordId),
-                                Scan_Loops = 0
+                                Scan_Loops = 4
                             });
                         }
+                        else
+                        {
 
+                            if (_Image.ToLower().Contains("powershell")) _CommandType = 1; else _CommandType = 2;
+
+                            if (Sysmon_Process_Table.FindIndex(x => x.PID == _PID && x.ProcessName.ToLower() == _Image.ToLower()) == -1)
+                            {
+                                Sysmon_Process_Table.Add(new _TableOfSysmon_Processes
+                                {
+                                    EventTime = Convert.ToDateTime(EvtRecords_Details[2].Substring(8)),
+                                    CommandTypes = _CommandType,
+                                    Description = "",
+                                    PID = _PID,
+                                    ProcessName = _Image,
+                                    ProcessName_Path = _Image,
+                                    SubItems_ImageIndex = 0,
+                                    SubItems_Name_Property = "",
+                                    _CommandLine = _CommandLine.ToLower(),
+                                    _EventMessage = _EventRecord.FormatDescription(),
+                                    _Image = _Image,
+                                    _ParentCommandLine = _ParentCommandLine,
+                                    AddedTime = DateTime.Now,
+                                    IsChecked = false,
+                                    ProcessItemsDetectedCount_Score = 0.ToString(),
+                                    IsDetected = false,
+                                    TechniqueID = "",
+                                    TechniqueID_Name = "",
+                                    CheckScore = 0,
+                                    CheckingMitreSubItems_Index = 0,
+                                    Event_Record_ID = Convert.ToInt64(_EventRecord.RecordId),
+                                    Scan_Loops = 0
+                                });
+                            }
+                        }
                         if (!init)
                         {
                             try
@@ -753,6 +832,7 @@ namespace BEV4.RealTime
                                     });
 
                                 });
+
                                 _Thread_RealTimeMon2 = new Thread(__Thread_RealTimeMon);
                                 _Thread_RealTimeMon2.Priority = ThreadPriority.Highest;
                                 _Thread_RealTimeMon2.Start();
