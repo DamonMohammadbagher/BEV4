@@ -517,12 +517,28 @@ namespace BEV4
                     {
                         foreach (ListViewItem obj in SortedList3_HighScore.OrderByDescending(x => x.SubItems[4].Text))
                         {
+                            try
+                            {
+
+                            
                             string Note = "Note: TechniqueID (" + obj.SubItems[2].Text + ") with High Score ["
                                     + obj.SubItems[4].Text.ToString() + "] Detected for Process"
                                     + obj.SubItems[6].Text.Replace('\r', ' ') + " (PID:" + obj.SubItems[7].Text.ToString() + ")";
                             Thread.Sleep(1500);
-                            if (Note != null && !string.IsNullOrWhiteSpace(Note) && !IsSummary)
-                                toolStripStatusLabel10.Text = Note;
+                                if (Note != null && !string.IsNullOrWhiteSpace(Note) && !IsSummary)
+                                {
+                                    Thread.Sleep(50);
+                                    BeginInvoke((MethodInvoker)delegate
+                                    {
+                                        toolStripStatusLabel10.Text = Note;
+                                    });
+                                }
+                            }
+                            catch (Exception)
+                            {
+
+                             //   throw;
+                            }
                         }                      
                     }
 
