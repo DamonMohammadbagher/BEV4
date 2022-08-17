@@ -755,10 +755,12 @@ namespace BEV4.RealTime
                         if (FoundHistoryItem != null)
                         {
                             /// this event raised before with same commanlines args so without scanning will add to Detected Process
-                            /// this code was for avoid from scanning Duplicate commandlines events which means
-                            /// we have two events with two eventRecordID also with two different PID but both are 
+                            /// this code was for avoid from scanning duplicate commandlines events which means
+                            /// we have two events with two eventRecordID also with two different PID but both 
                             /// have same CommandLines Args also Same ProcessName_Image
                             
+                            if (_Image.ToLower().Contains("powershell")) _CommandType = 1; else _CommandType = 2;
+
                             Sysmon_Process_Table.Add(new _TableOfSysmon_Processes
                             {
                                 EventTime = Convert.ToDateTime(EvtRecords_Details[2].Substring(8)),
