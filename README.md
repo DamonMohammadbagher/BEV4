@@ -4,7 +4,7 @@
 
  ```diff 
  + last source/exe update(5) v4.3.210.202 [Aug 23, 2022]... , 
- + bad bug for reloading events via dataGridView fixed , now reloading events is estable and working very well without error, i hope & Null Exception Error for Loading Events fixed too. 
+ + bad bug for reloading events via dataGridView fixed , now reloading events is working very well without error/crash, i hope & Null Exception Error for Loading Events fixed too. 
  ```
  
  BEV4 is Event Monitor tool (real-time & search) some simple things like Atomic-red-team yaml file added for test & Real time detection for some type of attack and ...
