@@ -61,42 +61,46 @@ namespace BEV4
                             if (!EventLogEntryError)
                             {
                                 evt = ((EventLogEntry)_items.BaseObject);
+                                if (evt != null)
+                                {
+                                    if (!Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding.Add(evt);
 
-                                if (!Form1.IsFilteringMode_Mittre_EID1)
-                                    TempBinding.Add(evt);
-
-                                if (Form1.IsFilteringMode_Mittre_EID1)
-                                    TempBinding_for_search1.Add(evt);
+                                    if (Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding_for_search1.Add(evt);
 
 
-                                if (!Form1.IsFilteringMode_Mittre_EID1)
-                                    Master_Value.MasterValueClass.SetRows_TO_table_Local(evt.Index.ToString(), evt.EntryType.ToString(),
-                                        evt.InstanceId.ToString(), evt.Message.ToString(), evt.TimeGenerated.ToString());
+                                    if (!Form1.IsFilteringMode_Mittre_EID1)
+                                        Master_Value.MasterValueClass.SetRows_TO_table_Local(evt.Index.ToString(), evt.EntryType.ToString(),
+                                            evt.InstanceId.ToString(), evt.Message.ToString(), evt.TimeGenerated.ToString());
 
-                                if (Form1.IsFilteringMode_Mittre_EID1)
-                                    Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
-                                        evt.Index.ToString(), evt.EntryType.ToString(), evt.InstanceId.ToString(),
-                                        evt.Message.ToString(), evt.TimeGenerated.ToString(), (object)evt);
+                                    if (Form1.IsFilteringMode_Mittre_EID1)
+                                        Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
+                                            evt.Index.ToString(), evt.EntryType.ToString(), evt.InstanceId.ToString(),
+                                            evt.Message.ToString(), evt.TimeGenerated.ToString(), (object)evt);
+                                }
                             }
                             else if (EventLogEntryError)
                             {
                                 evt2 = ((EventLogRecord)_items.BaseObject);
+                                if (evt2 != null)
+                                {
+                                    if (!Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding.Add(evt2);
 
-                                if (!Form1.IsFilteringMode_Mittre_EID1)
-                                    TempBinding.Add(evt2);
-
-                                if (Form1.IsFilteringMode_Mittre_EID1)
-                                    TempBinding_for_search1.Add(evt2);
+                                    if (Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding_for_search1.Add(evt2);
 
 
-                                if (!Form1.IsFilteringMode_Mittre_EID1)
-                                    Master_Value.MasterValueClass.SetRows_TO_table_Local(evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(),
-                                        evt2.Id.ToString(), evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString());
+                                    if (!Form1.IsFilteringMode_Mittre_EID1)
+                                        Master_Value.MasterValueClass.SetRows_TO_table_Local(evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(),
+                                            evt2.Id.ToString(), evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString());
 
-                                if (Form1.IsFilteringMode_Mittre_EID1)
-                                    Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
-                                       evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(), evt2.Id.ToString(),
-                                        evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString(), (object)evt2);
+                                    if (Form1.IsFilteringMode_Mittre_EID1)
+                                        Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
+                                           evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(), evt2.Id.ToString(),
+                                            evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString(), (object)evt2);
+                                }
                             }
                         }
                         catch (Exception err)
@@ -121,48 +125,52 @@ namespace BEV4
                             if (!EventLogEntryError)
                             {
                                 evt = ((EventLogEntry)_items.BaseObject);
-
-                                if (!Form1.IsFilteringMode_Mittre_EID1)
-                                    TempBinding.Add(evt);
-
-                                if (Form1.IsFilteringMode_Mittre_EID1)
-                                    TempBinding_for_search1.Add(evt);
-
-
-                                if (evt.TimeGenerated.Date >= dateTimePicker1.Value.Date
-                                    && evt.TimeGenerated.Date <= dateTimePicker2.Value.Date)
+                                if (evt != null)
                                 {
                                     if (!Form1.IsFilteringMode_Mittre_EID1)
-                                        Master_Value.MasterValueClass.SetRows_TO_table_Local(evt.Index.ToString(), evt.EntryType.ToString(),
-                                            evt.InstanceId.ToString(), evt.Message.ToString(), evt.TimeGenerated.ToString());
+                                        TempBinding.Add(evt);
 
                                     if (Form1.IsFilteringMode_Mittre_EID1)
-                                        Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
-                                            evt.Index.ToString(), evt.EntryType.ToString(), evt.InstanceId.ToString(),
-                                            evt.Message.ToString(), evt.TimeGenerated.ToString(), (object)evt);
+                                        TempBinding_for_search1.Add(evt);
+
+
+                                    if (evt.TimeGenerated.Date >= dateTimePicker1.Value.Date
+                                        && evt.TimeGenerated.Date <= dateTimePicker2.Value.Date)
+                                    {
+                                        if (!Form1.IsFilteringMode_Mittre_EID1)
+                                            Master_Value.MasterValueClass.SetRows_TO_table_Local(evt.Index.ToString(), evt.EntryType.ToString(),
+                                                evt.InstanceId.ToString(), evt.Message.ToString(), evt.TimeGenerated.ToString());
+
+                                        if (Form1.IsFilteringMode_Mittre_EID1)
+                                            Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
+                                                evt.Index.ToString(), evt.EntryType.ToString(), evt.InstanceId.ToString(),
+                                                evt.Message.ToString(), evt.TimeGenerated.ToString(), (object)evt);
+                                    }
                                 }
                             }
                             else if (EventLogEntryError)
                             {
                                 evt2 = ((EventLogRecord)_items.BaseObject);
-
-                                if (!Form1.IsFilteringMode_Mittre_EID1)
-                                    TempBinding.Add(evt2);
-
-                                if (Form1.IsFilteringMode_Mittre_EID1)
-                                    TempBinding_for_search1.Add(evt2);
-
-                                if (evt2.TimeCreated.Value.Date >= dateTimePicker1.Value.Date
-                                    && evt2.TimeCreated.Value.Date <= dateTimePicker2.Value.Date)
+                                if (evt2 != null)
                                 {
                                     if (!Form1.IsFilteringMode_Mittre_EID1)
-                                        Master_Value.MasterValueClass.SetRows_TO_table_Local(evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(),
-                                            evt2.Id.ToString(), evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString());
+                                        TempBinding.Add(evt2);
 
                                     if (Form1.IsFilteringMode_Mittre_EID1)
-                                        Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
-                                           evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(), evt2.Id.ToString(),
-                                            evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString(), (object)evt2);
+                                        TempBinding_for_search1.Add(evt2);
+
+                                    if (evt2.TimeCreated.Value.Date >= dateTimePicker1.Value.Date
+                                        && evt2.TimeCreated.Value.Date <= dateTimePicker2.Value.Date)
+                                    {
+                                        if (!Form1.IsFilteringMode_Mittre_EID1)
+                                            Master_Value.MasterValueClass.SetRows_TO_table_Local(evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(),
+                                                evt2.Id.ToString(), evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString());
+
+                                        if (Form1.IsFilteringMode_Mittre_EID1)
+                                            Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
+                                               evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(), evt2.Id.ToString(),
+                                                evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString(), (object)evt2);
+                                    }
                                 }
                             }
 
@@ -182,6 +190,165 @@ namespace BEV4
             });
         }
 
+        public async Task Powershell_Run_inBackgroud_Fast_once(bool FilteredByDate, string ActiveEventNameNode)
+        {
+            await Task.Run(() =>
+            {
+                PowerShell ps = PowerShell.Create();
+                bool EventLogEntryError = false;
+
+                if (ActiveEventNameNode.StartsWith("Microsoft-Windows-") && ActiveEventNameNode.Contains('/'))
+                {
+                    ps.AddScript("Get-WinEvent -LogName " + "\"" + ActiveEventNameNode + "\"", true);
+                    EventLogEntryError = true;
+                }
+                else
+                {
+                    ps.AddScript("Get-Eventlog -Logname " + ActiveEventNameNode, true);
+                    EventLogEntryError = false;
+                }
+
+                System.Collections.ObjectModel.Collection<PSObject> PowershellObjects = ps.Invoke();
+                EventLogEntry evt = null;
+                EventLogRecord evt2 = null;
+
+
+                if (!FilteredByDate)
+                {
+                    foreach (var _items in PowershellObjects.ToArray())
+                    {
+                        try
+                        {
+                            if (!EventLogEntryError)
+                            {
+                                evt = ((EventLogEntry)_items.BaseObject);
+                                if (evt != null)
+                                {
+                                    if (!Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding.Add(evt);
+
+                                    if (Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding_for_search1.Add(evt);
+
+
+                                    if (!Form1.IsFilteringMode_Mittre_EID1)
+                                        Master_Value.MasterValueClass.SetRows_TO_table_Local(evt.Index.ToString(), evt.EntryType.ToString(),
+                                            evt.InstanceId.ToString(), evt.Message.ToString(), evt.TimeGenerated.ToString());
+
+                                    if (Form1.IsFilteringMode_Mittre_EID1)
+                                        Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
+                                            evt.Index.ToString(), evt.EntryType.ToString(), evt.InstanceId.ToString(),
+                                            evt.Message.ToString(), evt.TimeGenerated.ToString(), (object)evt);
+                                }
+                            }
+                            else if (EventLogEntryError)
+                            {
+                                evt2 = ((EventLogRecord)_items.BaseObject);
+                                if (evt2 != null)
+                                {
+                                    if (!Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding.Add(evt2);
+
+                                    if (Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding_for_search1.Add(evt2);
+
+
+                                    if (!Form1.IsFilteringMode_Mittre_EID1)
+                                        Master_Value.MasterValueClass.SetRows_TO_table_Local(evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(),
+                                            evt2.Id.ToString(), evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString());
+
+                                    if (Form1.IsFilteringMode_Mittre_EID1)
+                                        Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
+                                           evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(), evt2.Id.ToString(),
+                                            evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString(), (object)evt2);
+                                }
+                            }
+                        }
+                        catch (Exception err)
+                        {
+
+                            /// "Unable to cast object of type 'System.Diagnostics.Eventing.Reader.EventLogRecord'
+                            /// to type 'System.Diagnostics.EventLogEntry'." 
+                            if (err.Message.Contains("Unable to cast object of type 'System.Diagnostics.Eventing.Reader.EventLogRecord'"))
+                                EventLogEntryError = true;
+                        }
+
+
+                    }
+                }
+                else
+                {
+                    foreach (var _items in PowershellObjects.ToArray())
+                    {
+                        try
+                        {
+
+                            if (!EventLogEntryError)
+                            {
+                                evt = ((EventLogEntry)_items.BaseObject);
+                                if (evt != null)
+                                {
+                                    if (!Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding.Add(evt);
+
+                                    if (Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding_for_search1.Add(evt);
+
+                                   
+
+                                    if (evt.TimeGenerated.Date == DateTime.Today.Date)
+                                    {
+                                        if (!Form1.IsFilteringMode_Mittre_EID1)
+                                            Master_Value.MasterValueClass.SetRows_TO_table_Local(evt.Index.ToString(), evt.EntryType.ToString(),
+                                                evt.InstanceId.ToString(), evt.Message.ToString(), evt.TimeGenerated.ToString());
+
+                                        if (Form1.IsFilteringMode_Mittre_EID1)
+                                            Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
+                                                evt.Index.ToString(), evt.EntryType.ToString(), evt.InstanceId.ToString(),
+                                                evt.Message.ToString(), evt.TimeGenerated.ToString(), (object)evt);
+                                    }
+                                }
+                            }
+                            else if (EventLogEntryError)
+                            {
+                                evt2 = ((EventLogRecord)_items.BaseObject);
+                                if (evt2 != null)
+                                {
+                                    if (!Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding.Add(evt2);
+
+                                    if (Form1.IsFilteringMode_Mittre_EID1)
+                                        TempBinding_for_search1.Add(evt2);
+
+                                    if (evt2.TimeCreated.Value.Date == DateTime.Today.Date)
+                                    {
+                                        if (!Form1.IsFilteringMode_Mittre_EID1)
+                                            Master_Value.MasterValueClass.SetRows_TO_table_Local(evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(),
+                                                evt2.Id.ToString(), evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString());
+
+                                        if (Form1.IsFilteringMode_Mittre_EID1)
+                                            Master_Value.MasterValueClass.SetRows_TO_table_Local_for_Search1(Master_Value.MasterValueClass.table_Local_search1,
+                                               evt2.RecordId.ToString(), evt2.LevelDisplayName.ToString(), evt2.Id.ToString(),
+                                                evt2.FormatDescription().ToString(), evt2.TimeCreated.ToString(), (object)evt2);
+                                    }
+                                }
+                            }
+
+                        }
+                        catch (Exception err2)
+                        {
+                            /// "Unable to cast object of type 'System.Diagnostics.Eventing.Reader.EventLogRecord'
+                            /// to type 'System.Diagnostics.EventLogEntry'." 
+                            if (err2.Message.Contains("Unable to cast object of type 'System.Diagnostics.Eventing.Reader.EventLogRecord'"))
+                                EventLogEntryError = true;
+                        }
+                    }
+                }
+
+                Form1.IsLocalRemote_SearchReloadFormActived = false;
+                CopyBindingSource();
+            });
+        }
 
 
         public void _Reload_Init()
@@ -289,6 +456,7 @@ namespace BEV4
             if (!Form1.IsFilteringMode_Mittre_EID1)
                 Master_Value.MasterValueClass.LocalBindingSource = TempBinding;
 
+            //GC.Collect();
             //Form1.IsLocalRemote_SearchReloadFormActived = false;
             this.Close();
 
@@ -452,6 +620,7 @@ namespace BEV4
                 button2.Enabled = false;
                 button3.Enabled = false;
                 button4.Enabled = false;
+                button5.Enabled = false;
                 Thread.Sleep(1500);
                 this.Update();
                 _Reload_Init();
@@ -487,7 +656,7 @@ namespace BEV4
                 button2.Enabled = false;
                 button3.Enabled = false;
                 button4.Enabled = false;
-
+                button5.Enabled = false;
                 Thread.Sleep(1500);
                 this.Update();
                 _Reload_Init();
@@ -532,7 +701,7 @@ namespace BEV4
                 button2.Enabled = false;
                 button3.Enabled = false;
                 button4.Enabled = false;
-
+                button5.Enabled = false;
                 Thread.Sleep(1500);
                 this.Update();
             }
@@ -568,6 +737,7 @@ namespace BEV4
                 button2.Enabled = false;
                 button3.Enabled = false;
                 button4.Enabled = false;
+                button5.Enabled = false;
 
                 Thread.Sleep(1500);
                 this.Update();
@@ -582,6 +752,23 @@ namespace BEV4
             string Xeventname = Master_Value.MasterValueClass.ActiveNode;
             Task _ReloadviaPowershell_All = Powershell_Run_inBackgroud_Fast(true, Xeventname);
             await _ReloadviaPowershell_All.ConfigureAwait(true);
+        }
+
+       
+        private void Button5_Click_2(object sender, EventArgs e)
+        {
+            this.Close();
+
+        }
+
+        private void Button5_MouseEnter(object sender, EventArgs e)
+        {
+            button5.BackColor = Color.PaleGoldenrod;
+        }
+
+        private void Button5_MouseLeave(object sender, EventArgs e)
+        {
+            button5.BackColor = Color.Transparent;
         }
 
         private void label2_Click(object sender, EventArgs e)

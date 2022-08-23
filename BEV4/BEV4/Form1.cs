@@ -264,7 +264,8 @@ namespace BEV4
             {
                 if (!IsRealTimeOn)
                 {
-                    await _Reload_Remote();
+                   // await _Reload_Remote();
+                    BeginInvoke((MethodInvoker)delegate { RunAsyn__Reload_Remote(); });
                 }
                 else
                 {
@@ -500,6 +501,88 @@ namespace BEV4
 
                
             }
+
+            /// reload BEV4.3 Events When BEV4 Started.
+            /// bad bug fixed here ;)
+            try
+            {
+                treeView1.ExpandAll();               
+                treeView1.SelectedNode = treeView1.Nodes.Find("BEV4.3", true)[0];                
+
+                BeginInvoke((MethodInvoker)delegate { RunAsync_BEVStartupLoading(); });
+            }
+            catch (Exception)
+            {
+           
+            }
+
+        }
+
+        public async void RunAsync_BEVStartupLoading()
+        {
+            await BEVStartupLoading();
+        }
+
+        private async Task BEVStartupLoading()
+        {
+            try
+            {
+                IsFilteringMode_Mittre_EID1 = false;
+                Master_Value.MasterValueClass.ActiveNode = "BEV4.3";
+                if (IsFilteringMode_Mittre_EID1)
+                {
+                    Master_Value.MasterValueClass.Settable_LocalTable_for_search1();
+                    Master_Value.MasterValueClass.Settable_LocalTable_for_search1_result();
+                }
+
+                if (!IsFilteringMode_Mittre_EID1)
+                    Master_Value.MasterValueClass.Settable_LocalTable();
+            }
+            catch (Exception)
+            {
+            }
+        
+            WaitForm2 wf2 = new WaitForm2();
+            string Xeventname = Master_Value.MasterValueClass.ActiveNode;
+            Task _ReloadviaPowershell_All = wf2.Powershell_Run_inBackgroud_Fast_once(true, Xeventname);
+            await _ReloadviaPowershell_All.ConfigureAwait(false);
+
+            do
+            {
+
+                Thread.Sleep(50);
+
+            } while (!_ReloadviaPowershell_All.IsCompleted);
+
+            groupBox6.Text = "Event Messages for Event Name (" + Master_Value.MasterValueClass.ActiveNode + ") Filter: TODAY events only"
+           + " , Local System";
+
+
+            await Task.Run(() =>
+            {
+
+                BeginInvoke((MethodInvoker)delegate
+                {
+                    try
+                    {
+
+                        TempBinding_Local.DataSource = Master_Value.MasterValueClass.table_Local;
+                        dataGridView2.DataSource = TempBinding_Local.DataSource;
+
+                        dataGridView2.Update();
+                        dataGridView2.Refresh();
+
+                        dataGridView2.Visible = true;
+                        dataGridView2.Show();
+
+                    }
+                    catch (Exception err)
+                    {
+
+                    }
+                });
+           });
+
         }
 
         private async void T4_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -513,32 +596,49 @@ namespace BEV4
                 try
                 {
                     toolStripStatusLabel10.BackColor = Color.DarkGray;
+                   // int count = 0;
                     if (IsSummary_Details)
                     {
+                        
                         foreach (ListViewItem obj in SortedList3_HighScore.OrderByDescending(x => x.SubItems[4].Text))
                         {
                             try
                             {
+                               // if (count >= 10) break;
 
-                            
-                            string Note = "Note: TechniqueID (" + obj.SubItems[2].Text + ") with High Score ["
-                                    + obj.SubItems[4].Text.ToString() + "] Detected for Process"
-                                    + obj.SubItems[6].Text.Replace('\r', ' ') + " (PID:" + obj.SubItems[7].Text.ToString() + ")";
-                            Thread.Sleep(1500);
+                                string Note = "Note: TechniqueID (" + obj.SubItems[2].Text + ") with High Score ["
+                                + obj.SubItems[4].Text.ToString() + "] Detected for Process"
+                                + obj.SubItems[6].Text.Replace('\r', ' ') + " (PID:" + obj.SubItems[7].Text.ToString() + ")";
+                                Thread.Sleep(1500);
                                 if (Note != null && !string.IsNullOrWhiteSpace(Note) && !IsSummary)
                                 {
+                                    var _Delay = Task.Delay(TimeSpan.FromSeconds(2));
+                                    do
+                                    {
+                                        Thread.Sleep(2);
+                                        if (_Delay.IsCompleted)
+                                        {
+                                            break;
+                                        }
+
+                                    } while (!_Delay.IsCompleted);
+
                                     Thread.Sleep(50);
                                     BeginInvoke((MethodInvoker)delegate
                                     {
                                         toolStripStatusLabel10.Text = Note;
                                     });
                                 }
+
+                               
                             }
                             catch (Exception)
                             {
 
-                             //   throw;
+                                //   throw;
                             }
+
+                           // count++;
                         }                      
                     }
 
@@ -589,6 +689,7 @@ namespace BEV4
         {
             await Task.Run(() =>
              {
+                
 
                  try
                  {
@@ -784,7 +885,8 @@ namespace BEV4
                              {
                                  foreach (RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes items in list)
                                  {
-                                     Task.Delay(20);
+                                     //Task.Delay(20);
+                                     Task.Delay(20).GetAwaiter();
 
                                      if (DetectedList_Listview2.FindIndex(x => x == items.ProcessName + "@" + items.PID.ToString()
                                             + "@" + items.ProcessItemsDetectedCount_Score.ToString() + items.Event_Record_ID.ToString()
@@ -1098,13 +1200,24 @@ namespace BEV4
             this.Close();
         }
 
+        public async void RunAsyn__Reload_Local()
+        {
+            await _Reload_Local();
+        }
+
+        public async void RunAsyn__Reload_Remote()
+        {
+            await _Reload_Remote();
+        }
+
         private async void relaodToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
                 if (!IsRealTimeOn)
                 {
-                    await _Reload_Local();
+                    //  await _Reload_Local();
+                    BeginInvoke((MethodInvoker)delegate { RunAsyn__Reload_Local(); });
                 }
                 else
                 {
@@ -1223,8 +1336,7 @@ namespace BEV4
             try
             {
                 if (e.Node.Text != null)
-                {
-
+                {                  
                     ThreadStart T_Core1_Search1 = new ThreadStart(delegate
                     {
                          BeginInvoke(new _Core3(ChangeTreviewInfo), e.Node);
@@ -1334,7 +1446,8 @@ namespace BEV4
                 
                 if (!IsRealTimeOn)
                 {
-                    await _Reload_Local();
+                    //await _Reload_Local();
+                    BeginInvoke((MethodInvoker)delegate { RunAsyn__Reload_Local(); });
                 }
                 else
                 {
@@ -1388,7 +1501,8 @@ namespace BEV4
             {
                 if (!IsRealTimeOn)
                 {
-                    await _Reload_Remote();
+                    // await _Reload_Remote();
+                    BeginInvoke((MethodInvoker)delegate { RunAsyn__Reload_Remote(); });
                 }
                 else
                 {
@@ -2444,7 +2558,8 @@ namespace BEV4
             {
                 if (_Thread_RealTimeMon.IsAlive)
                 {
-                    IsStopRealTime = true; _Thread_RealTimeMon.Abort();                   
+                    IsStopRealTime = true; _Thread_RealTimeMon.Abort();
+                    
                 }
 
                 if (RealTime.RealtimeEventIDsMonitor._Thread_RealTimeMon2.IsAlive)
