@@ -199,7 +199,7 @@ namespace BEV4.RealTime
                     foreach (_TableOfSysmon_Processes item in Filtered_Process_list_Arguments)
                     {
                         _commandx = item._CommandLine.Split(' ');
-
+                        if (Form1.IsStopRealTime) break;
                         Thread.Sleep(200);
                         //Task.Delay(250);
 
