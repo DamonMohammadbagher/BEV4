@@ -67,7 +67,7 @@ namespace BEV4.Local_Forms
                             }
                             else
                             {
-                                T3.Nodes.Add(item).ToolTipText = _GetTotalRecords.RecordCount.ToString();
+                                T3.Nodes.Add(item,item).ToolTipText = _GetTotalRecords.RecordCount.ToString();
                             }
                         }
                         catch (Exception err)
