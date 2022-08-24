@@ -63,7 +63,7 @@ namespace BEV4.Local_Forms
                             if (item == "Application" | item == "System" | item == "Security" | item == "Setup" | item == "Forwarded Events")
                             {
 
-                                T2.Nodes.Add(item).ToolTipText = _GetTotalRecords.RecordCount.ToString();
+                                T2.Nodes.Add(item,item).ToolTipText = _GetTotalRecords.RecordCount.ToString();
                             }
                             else
                             {
