@@ -507,7 +507,7 @@ namespace BEV4
             try
             {
                 treeView1.ExpandAll();               
-                treeView1.SelectedNode = treeView1.Nodes.Find("BEV4.3", true)[0];                
+                treeView1.SelectedNode = treeView1.Nodes.Find("Application", true)[0];                
 
                 BeginInvoke((MethodInvoker)delegate { RunAsync_BEVStartupLoading(); });
             }
@@ -528,7 +528,8 @@ namespace BEV4
             try
             {
                 IsFilteringMode_Mittre_EID1 = false;
-                Master_Value.MasterValueClass.ActiveNode = "BEV4.3";
+                //Master_Value.MasterValueClass.ActiveNode = "BEV4.3";
+                Master_Value.MasterValueClass.ActiveNode = "Application";
                 if (IsFilteringMode_Mittre_EID1)
                 {
                     Master_Value.MasterValueClass.Settable_LocalTable_for_search1();
