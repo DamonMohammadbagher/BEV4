@@ -21,12 +21,12 @@ Note: in this code some yaml files (atomic-red-team yaml files) added to source 
 ------------
 
 ```diff
-!Note: in BEV4 new version [v4.3.247.298] you can update BEV Database for Real-time Scanner via two methods:
-```
-`1.via Simple text DB file (your own DB) `
- 
-`2.via Atomic-Red-Team md file (which you can download from github repo: https://github.com/redcanaryco/atomic-red-team)`
 
+!Note: in BEV4 new version [v4.3.247.298] you can update BEV Database for Real-time Scanner via two methods:
+
+! 1.via Simple text DB file (your own DB)
+! 2.via Atomic-Red-Team md file (which you can download from github repo: https://github.com/redcanaryco/atomic-red-team)
+```
 Videos for Updating BEV4 DB via two Methods: via simple text DB file and via Atomic-red-team md file ....
 
 Video [new version] for BEV4: https://www.youtube.com/watch?v=T1jYT_WcRZk
