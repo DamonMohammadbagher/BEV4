@@ -691,7 +691,7 @@ namespace BEV4.Mitre_Attack
             return temp_table_Local_search1;
         }
 
-        public static async Task MakeSimpleTextFile_AllCommandPrompts(MitreAttack_Attack_Items[] _MitreAttackList_Array_Copy)
+        public static async Task UpdateDB_and_MakeSimpleTextFile_AllCommandPrompts(bool Is_Set_to_UpdateDB, MitreAttack_Attack_Items[] _MitreAttackList_Array_Copy)
         {
             try
             {
@@ -717,16 +717,56 @@ namespace BEV4.Mitre_Attack
                         }
 
                     }
+
                     string dump = "";
+                    int count = 0;
+                    string temp = "";
+
                     using (StreamWriter sw = new StreamWriter("All_yaml_Files_Details.txt"))
                     {
                         int counter = 1;
+                        bool write = false;
                         foreach (MitreAttack_Attack_Items item in commands)
                         {
-
+                            /// adding Yaml files into text file (also open via notepad)
+                            /// 
                             sw.WriteLine(counter.ToString() + ": [" + item.Name + "] [" + item.Attack_technique_ID + "] [" + item.CommandPrompt + "]");
-                            counter++;
+
+                            if (Is_Set_to_UpdateDB)
+                            {
+                                if (item.Name.Substring(8) == temp)
+                                    count++;
+                                else
+                                    count = 0;
+
+                                /// adding Yaml files as "New Updates" into DATABASE...
+                                /// 
+
+                                if (item.CommandPrompt == "    command: |") write = true;
+                                if (item.CommandPrompt.Contains("    cleanup_command: |") || item.CommandPrompt.Contains("    name: ")
+                                || string.IsNullOrWhiteSpace(item.CommandPrompt)) write = false;
+
+                                /// some bugs in DB Loading fixed ;)
+                                /// problem is in yaml files with a lot items ;)
+                                if (write && item.CommandPrompt != "    command: |"
+                                && item.CommandPrompt != "  executor:"
+                                && item.CommandPrompt != "  - windows"
+                                && item.CommandPrompt != "  supported_platforms:")
+                                    Master_Value.MasterValueClass.SetRows_TO_table_MitreAttackTechniques(
+                                    Master_Value.MasterValueClass.table_MitreAttackTechniques
+                                    , counter
+                                    , item.Name.Substring(8)
+                                    , item.Attack_technique_ID.Substring(18)
+                                    , count
+                                    , item.CommandPrompt
+                                    , ""
+                                    , "");
+
+                                temp = item.Name.Substring(8);
+                                counter++;
+                            }
                         }
+
                         sw.Close();
 
                     }
@@ -749,7 +789,111 @@ namespace BEV4.Mitre_Attack
                     }
                     try
                     {
-                        Process.Start("Notepad.exe", "All_TechniqueIDs_CommandPrompt.txt");
+                        if (!Is_Set_to_UpdateDB)
+                        {
+                            Process.Start("Notepad.exe", "All_TechniqueIDs_CommandPrompt.txt");
+                        }
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+
+                });
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        public static async Task UpdateDB_via_SimpleTextFile(bool Is_Set_to_UpdateDB, MitreAttack_Attack_Items[] _your_own_AttackList_Array_Copy)
+        {
+            try
+            {
+                List<MitreAttack_Attack_Items> commands = new List<MitreAttack_Attack_Items>();
+                await Task.Run(() =>
+                {
+                    string[] cmds = null;
+                    foreach (MitreAttack_Attack_Items Xitem in _your_own_AttackList_Array_Copy)
+                    {
+                        cmds = Xitem.CommandPrompt.Split('\n');
+                        foreach (string item_cmd in cmds)
+                        {
+                            string[] s = new string[3];
+                            s[0] = item_cmd;
+                            s[1] = Xitem.Name;
+                            s[2] = Xitem.Attack_technique_ID;
+                            commands.Add(new MitreAttack_Attack_Items
+                            {
+                                Attack_technique_ID = s[2],
+                                CommandPrompt = s[0],
+                                Name = s[1]
+                            });
+                        }
+
+                    }
+
+                    string dump = "";
+                    int count = 0;
+                    string temp = "";
+
+                    using (StreamWriter sw = new StreamWriter("All_yaml_Files_Details.txt"))
+                    {
+                        int counter = 1;
+                        bool write = false;
+                        foreach (MitreAttack_Attack_Items item in commands)
+                        {
+                            /// adding Yaml files into text file (also open via notepad)
+                            /// 
+                            sw.WriteLine(counter.ToString() + ": [" + item.Name + "] [" + item.Attack_technique_ID + "] [" + item.CommandPrompt + "]");
+
+                            if (Is_Set_to_UpdateDB)
+                            {
+                                if (item.Name == temp)
+                                    count++;
+                                else
+                                    count = 0;
+
+                                Master_Value.MasterValueClass.SetRows_TO_table_MitreAttackTechniques(
+                                Master_Value.MasterValueClass.table_MitreAttackTechniques
+                                , counter
+                                , item.Name.Substring(8)
+                                , item.Attack_technique_ID.Substring(18)
+                                , count
+                                , item.CommandPrompt
+                                , ""
+                                , "");
+
+                                temp = item.Name;
+                                counter++;
+                            }
+                        }
+
+                        sw.Close();
+
+                    }
+
+                    using (StreamWriter sw = new StreamWriter("All_TechniqueIDs_CommandPrompt.txt"))
+                    {
+                        int counter = 1;
+                        bool write = false;
+                        foreach (MitreAttack_Attack_Items item in commands)
+                        {
+                            sw.WriteLine(counter.ToString() + ": [" + item.Name + "] [" + item.Attack_technique_ID + "] [" + item.CommandPrompt + "]");
+                            counter++;
+                        }
+                        sw.Close();
+
+                    }
+
+                    try
+                    {
+                        if (!Is_Set_to_UpdateDB)
+                        {
+                            Process.Start("Notepad.exe", "All_TechniqueIDs_CommandPrompt.txt");
+                        }
                     }
                     catch (Exception)
                     {
