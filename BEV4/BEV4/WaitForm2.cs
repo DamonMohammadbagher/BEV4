@@ -278,6 +278,14 @@ namespace BEV4
                 }
                 else
                 {
+                    //if (PowershellObjects.Count < 50)
+                    //{
+                    //    int _count = PowershellObjects.Count;
+                    //    int total = 50 - _count;
+                    //}
+                    //else
+                    //{}
+
                     foreach (var _items in PowershellObjects.ToArray())
                     {
                         try
@@ -294,7 +302,7 @@ namespace BEV4
                                     if (Form1.IsFilteringMode_Mittre_EID1)
                                         TempBinding_for_search1.Add(evt);
 
-                                   
+
 
                                     if (evt.TimeGenerated.Date == DateTime.Today.Date)
                                     {
@@ -343,6 +351,7 @@ namespace BEV4
                                 EventLogEntryError = true;
                         }
                     }
+
                 }
 
                 Form1.IsLocalRemote_SearchReloadFormActived = false;

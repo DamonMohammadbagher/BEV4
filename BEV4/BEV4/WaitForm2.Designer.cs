@@ -39,6 +39,7 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button5 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
@@ -63,7 +64,7 @@
             // 
             this.button1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.button1.Enabled = false;
-            this.button1.Location = new System.Drawing.Point(3, 86);
+            this.button1.Location = new System.Drawing.Point(3, 106);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(431, 23);
             this.button1.TabIndex = 4;
@@ -75,7 +76,7 @@
             // 
             this.button2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.button2.Enabled = false;
-            this.button2.Location = new System.Drawing.Point(3, 63);
+            this.button2.Location = new System.Drawing.Point(3, 83);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(431, 23);
             this.button2.TabIndex = 5;
@@ -106,7 +107,7 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1,
             this.toolStripStatusLabel2});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 165);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 193);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(437, 22);
             this.statusStrip1.TabIndex = 8;
@@ -126,22 +127,37 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.button5);
             this.groupBox1.Controls.Add(this.button3);
             this.groupBox1.Controls.Add(this.button4);
             this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.groupBox1.Location = new System.Drawing.Point(0, 53);
+            this.groupBox1.Location = new System.Drawing.Point(0, 61);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(437, 112);
+            this.groupBox1.Size = new System.Drawing.Size(437, 132);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Select Date Filter or Load All Events";
             // 
+            // button5
+            // 
+            this.button5.BackColor = System.Drawing.Color.Transparent;
+            this.button5.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.button5.Location = new System.Drawing.Point(3, 14);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(431, 23);
+            this.button5.TabIndex = 8;
+            this.button5.Text = "Cancel";
+            this.button5.UseVisualStyleBackColor = false;
+            this.button5.Click += new System.EventHandler(this.Button5_Click_2);
+            this.button5.MouseEnter += new System.EventHandler(this.Button5_MouseEnter);
+            this.button5.MouseLeave += new System.EventHandler(this.Button5_MouseLeave);
+            // 
             // button3
             // 
             this.button3.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.button3.Location = new System.Drawing.Point(3, 17);
+            this.button3.Location = new System.Drawing.Point(3, 37);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(431, 23);
             this.button3.TabIndex = 7;
@@ -152,7 +168,7 @@
             // button4
             // 
             this.button4.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.button4.Location = new System.Drawing.Point(3, 40);
+            this.button4.Location = new System.Drawing.Point(3, 60);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(431, 23);
             this.button4.TabIndex = 6;
@@ -164,7 +180,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(437, 187);
+            this.ClientSize = new System.Drawing.Size(437, 215);
             this.ControlBox = false;
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.statusStrip1);
@@ -173,9 +189,9 @@
             this.Controls.Add(this.dateTimePicker2);
             this.Controls.Add(this.dateTimePicker1);
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(453, 226);
+            this.MaximumSize = new System.Drawing.Size(453, 254);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(453, 226);
+            this.MinimumSize = new System.Drawing.Size(453, 254);
             this.Name = "WaitForm2";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -204,5 +220,6 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button5;
     }
 }

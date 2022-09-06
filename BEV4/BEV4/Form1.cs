@@ -35,7 +35,7 @@ namespace BEV4
         public static System.Timers.Timer t = new System.Timers.Timer(100);
         public static System.Timers.Timer t1 = new System.Timers.Timer(5000);
         public static System.Timers.Timer t2 = new System.Timers.Timer(400);
-        public static System.Timers.Timer t3 = new System.Timers.Timer(5000);
+        public static System.Timers.Timer t3 = new System.Timers.Timer(1200);
         public static System.Timers.Timer t4 = new System.Timers.Timer(10000);
         Mitre_Attack.MitreAttackClass mitre = new Mitre_Attack.MitreAttackClass();
         private BindingSource TempBinding_Local;
@@ -74,8 +74,12 @@ namespace BEV4
         public static EventLog BEV4 = null;
         public static string CurrentStr = "";
         public static string CurrentStr2 = "";
-        public static bool IsSummary = false;
-        public static bool IsSummary_Details = false;       
+        public static bool IsSummary = true;
+        public static bool IsSummary_Details = true;
+        public static bool _Is_DB_Updated = false;
+        public static bool _Is_DB_Records_Updated = false;
+        public static string _DB_CurrentVersion = "DB Update ver: " + "(windows-index.md 22/07/2022)";
+        public static string _DB_CurrentVersion_FilePath = "BEV4 source code , (Default Database)";
         
         public void Refresh_Remote_TreeNodes()
         {
@@ -306,13 +310,64 @@ namespace BEV4
             }
 
         }
+        
+        private async Task _DB_Update()
+        {
+            try
+            {
+                Master_Value.MasterValueClass.Settable_MitreAttackTechniques();
+                string CommandsListFile = RealTime.Resource2.TextFile1_AllCommandPrompts;
+
+                /// 365: [- name: Enumeration for PuTTY Credentials in Registry] [attack_technique: T1552.002] [      reg query HKCU\Software\SimonTatham\PuTTY\Sessions /t REG_SZ /s]
+                string[] _DetailsCommands_yamlfiles_details = CommandsListFile.Split('\n');
+                string steps = "";
+                int count = 0;
+                string temp = "";
+                foreach (string item in _DetailsCommands_yamlfiles_details)
+                {
+                    if (!item.Contains(" [    command: |]"))
+                    {
+                        try
+                        {
+                            if (item.Split('[')[1].Split(']')[0].Substring(8) == temp)
+                            {
+                                count++;
+                            }
+                            else { count = 0; }
+                            string techId = item.Split('[')[2].Split(']')[0].Substring(18);
+                            Master_Value.MasterValueClass.SetRows_TO_table_MitreAttackTechniques(Master_Value.MasterValueClass.table_MitreAttackTechniques
+                            , Convert.ToInt32(item.Split(':')[0])
+                            , item.Split('[')[1].Split(']')[0].Substring(8)
+                            , item.Split('[')[2].Split(']')[0].Substring(18)
+                            , count
+                            , item.Substring(Mitre_Attack.MitreAttackClass._FindAllIndex("attack_technique:", item, 0)[0] + 17 + techId.Length + 3)
+                            , "", "");
+                            temp = item.Split('[')[1].Split(']')[0].Substring(8);
+                        }
+                        catch (Exception)
+                        {
+
+                        }
+                    }
+                }
+
+                dataGridView7.DataSource = Master_Value.MasterValueClass.table_MitreAttackTechniques;
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
 
         private void Form1_Load(object sender, EventArgs e) 
         {
             try
             {
                 Form.CheckForIllegalCrossThreadCalls = false;
-                toolStripProgressBar2.AutoToolTip = true;
+                //toolStripProgressBar2.AutoToolTip = true;
+                updateDatabaseviaAtomicRedTeamWindowsIndexmdFileToolStripMenuItem.Enabled = false;
+                loadCMDPromptsFromAllYamlFilesIntoTextFileToolStripMenuItem.Enabled = false;
                 try
                 {
                    
@@ -365,8 +420,9 @@ namespace BEV4
                
 
                 _Set_iListview_Properties(listView2, new string[] { " ","Event Time","TechniqueID", "Display Name", "Detection Score",
-                    "DB SubItemIndex","Process Name","PID","CommandLine","EventRecord_Id", "Event Message"}
-              , new int[] { 20, 130, 100, 180, 100, 140,140, 50,400,100,100 }, imageList1);
+                    "DB SubItemIndex","Process Name","PID","CommandLine","EventRecord_Id",
+                    "Event Message","Detected Technique CommandLine","DB LastUpdated File Path","DB LastUpdated ver"}
+              , new int[] { 20, 130, 100, 180, 100, 140,140, 50,400,100,100,100,100,100 }, imageList1);
 
 
                 //_Set_iListview_Properties(listView3, new string[] { " ","Event Time","TechniqueID", "Display Name", "Detection Score",
@@ -555,6 +611,9 @@ namespace BEV4
 
             } while (!_ReloadviaPowershell_All.IsCompleted);
 
+            updateDatabaseviaAtomicRedTeamWindowsIndexmdFileToolStripMenuItem.Enabled = true;
+            loadCMDPromptsFromAllYamlFilesIntoTextFileToolStripMenuItem.Enabled = true;
+
             groupBox6.Text = "Event Messages for Event Name (" + Master_Value.MasterValueClass.ActiveNode + ") Filter: TODAY events only"
            + " , Local System";
 
@@ -586,32 +645,31 @@ namespace BEV4
 
         }
 
-        private async void T4_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private async Task ShowScan_Details()
         {
-           
-            t3.Enabled = false;
-            t3.Stop();
-         
+            //t3.Enabled = false;
+            //t3.Stop();
+
             await Task.Run(() =>
             {
                 try
                 {
                     toolStripStatusLabel10.BackColor = Color.DarkGray;
-                   // int count = 0;
+                    // int count = 0;
                     if (IsSummary_Details)
                     {
-                        
+
                         foreach (ListViewItem obj in SortedList3_HighScore.OrderByDescending(x => x.SubItems[4].Text))
                         {
                             try
                             {
-                               // if (count >= 10) break;
+                                // if (count >= 10) break;
 
                                 string Note = "Note: TechniqueID (" + obj.SubItems[2].Text + ") with High Score ["
                                 + obj.SubItems[4].Text.ToString() + "] Detected for Process"
                                 + obj.SubItems[6].Text.Replace('\r', ' ') + " (PID:" + obj.SubItems[7].Text.ToString() + ")";
                                 Thread.Sleep(1500);
-                                if (Note != null && !string.IsNullOrWhiteSpace(Note) && !IsSummary)
+                                if (Note != null && !string.IsNullOrWhiteSpace(Note)/* && !IsSummary*/)
                                 {
                                     var _Delay = Task.Delay(TimeSpan.FromSeconds(2));
                                     do
@@ -631,7 +689,7 @@ namespace BEV4
                                     });
                                 }
 
-                               
+
                             }
                             catch (Exception)
                             {
@@ -639,16 +697,17 @@ namespace BEV4
                                 //   throw;
                             }
 
-                           // count++;
-                        }                      
+                            // count++;
+                        }
                     }
 
                     IsSummary = true;
-                    IsSummary_Details = false;
-                    t3.Enabled = true;
-                    t3.Start();
-                    t4.Enabled = false;
-                    t4.Stop();
+                    IsSummary_Details = true;
+                    //IsSummary_Details = false;
+                    //t3.Enabled = true;
+                    //t3.Start();
+                    //t4.Enabled = false;
+                    //t4.Stop();
 
                 }
                 catch (Exception)
@@ -656,35 +715,58 @@ namespace BEV4
 
                 }
             });
-
-           
         }
 
-        private async void T3_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private async void RunAsync_ShowScan_Details()
         {
-            await Task.Run(() =>
-            {
-                if (IsSummary)
+            await ShowScan_Details();
+        }
+
+        private  void T4_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            //await Task.Run(() =>
+            //{
+                BeginInvoke((MethodInvoker)delegate { RunAsync_ShowScan_Details(); });
+            //});
+        }
+
+        private void T3_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            //t4.Enabled = true;
+            //t4.Start();
+
+            //await Task.Run(() =>
+            //{
+            //    if (IsSummary)
+            //    {
+            //        IsSummary = false;
+            //        IsSummary_Details = false;
+            //        t4.Enabled = false;
+            //        t4.Stop();
+            //    }
+            //    else
+            //    {
+            //        IsSummary = false;
+            //        IsSummary_Details = true;
+            //        t4.Enabled = true;
+            //        t4.Start();
+            //    }
+            //});
+
+            //await Task.Run(() =>
+            //{
+                BeginInvoke((MethodInvoker)delegate
                 {
-                    IsSummary = false;
-                    IsSummary_Details = false;
-                    t4.Enabled = false;
-                    t4.Stop();
-                }
-                else
-                {
-                    IsSummary = false;
-                    IsSummary_Details = true;
-                    t4.Enabled = true;
-                    t4.Start();
-                }
-            });
+                    RunAsync_RefreshCurrentScan(RealTime.RealtimeEventIDsMonitor.CurrentScan,
+                    RealTime.RealtimeEventIDsMonitor.CurrentScan2);
+                });
+            //});
         }
 
         private async void RunAsync_RefreshCurrentScan(object obj1, object obj2)
         {
             await RefreshCurrentScan(obj1, obj2);
-        }
+        }      
 
         private async Task RefreshCurrentScan(object CurrentScan, object CurrentScan2)
         {
@@ -692,74 +774,74 @@ namespace BEV4
              {
                 
 
+                 //try
+                 //{
+                 //    Delegate _RefreshCurrentScan2 = ((MethodInvoker)delegate
+                 //    {
+                 //        try
+                 //        {
+                 //            if (!toolStripStatusLabel8.Text.Contains("Scan Finished!"))
+                 //            {
+
+                 //                toolStripStatusLabel12.Text = "[" +
+                 //                (RealTime.RealtimeEventIDsMonitor.iCounter + 1).ToString()
+                 //                + " of " +
+                 //                RealTime.RealtimeEventIDsMonitor.icounter_Max.ToString() + "]";
+                 //            }
+                 //        }
+                 //        catch (Exception)
+                 //        {
+
+
+                 //        }
+                 //    });
+
+                 //    Task.Run(() => { BeginInvoke((MethodInvoker)delegate { _RefreshCurrentScan2.DynamicInvoke(); }); }).GetAwaiter();
+                 //}
+                 //catch (Exception)
+                 //{
+
+
+                 //}
+
                  try
                  {
-                     Delegate _RefreshCurrentScan2 = ((MethodInvoker)delegate
-                     {
-                         try
-                         {
-                             if (!toolStripStatusLabel8.Text.Contains("Scan Finished!"))
-                             {
+                     //Delegate _RefreshCurrentScan1 = ((MethodInvoker)delegate
+                     //{
+                     //    try
+                     //    {
+                     //        if (!richTextBox35.Text.Contains("Scan Finished!"))
+                     //        {
+                     //            if (RealTime.RealtimeEventIDsMonitor.iCounter > 0)
+                     //                toolStripProgressBar2.Value =
+                     //                    RealTime.RealtimeEventIDsMonitor.iCounter * 100
+                     //                    / RealTime.RealtimeEventIDsMonitor.icounter_Max;
+                     //        }
+                     //        else toolStripProgressBar2.Value = 0;
+                     //    }
+                     //    catch (Exception)
+                     //    {
+                     //        toolStripProgressBar2.Value = 0;
+                     //    }
+                     //});
 
-                                 toolStripStatusLabel12.Text = "[" +
-                                 (RealTime.RealtimeEventIDsMonitor.iCounter + 1).ToString()
-                                 + " of " +
-                                 RealTime.RealtimeEventIDsMonitor.icounter_Max.ToString() + "]";
-                             }
-                         }
-                         catch (Exception)
-                         {
+                     //Task.Run(() =>
+                     //{
+                     //    BeginInvoke((MethodInvoker)delegate
+                     //    {
+                     //        try
+                     //        {
+                     //            _RefreshCurrentScan1.DynamicInvoke();
 
-
-                         }
-                     });
-
-                     Task.Run(() => { BeginInvoke((MethodInvoker)delegate { _RefreshCurrentScan2.DynamicInvoke(); }); }).GetAwaiter();
-                 }
-                 catch (Exception)
-                 {
-
-
-                 }
-
-                 try
-                 {
-                     Delegate _RefreshCurrentScan1 = ((MethodInvoker)delegate
-                     {
-                         try
-                         {
-                             if (!toolStripStatusLabel8.Text.Contains("Scan Finished!"))
-                             {
-                                 if (RealTime.RealtimeEventIDsMonitor.iCounter > 0)
-                                     toolStripProgressBar2.Value =
-                                         RealTime.RealtimeEventIDsMonitor.iCounter * 100
-                                         / RealTime.RealtimeEventIDsMonitor.icounter_Max;
-                             }
-                             else toolStripProgressBar2.Value = 0;
-                         }
-                         catch (Exception)
-                         {
-                             toolStripProgressBar2.Value = 0;
-                         }
-                     });
-
-                     Task.Run(() =>
-                     {
-                         BeginInvoke((MethodInvoker)delegate
-                         {
-                             try
-                             {
-                                 _RefreshCurrentScan1.DynamicInvoke();
-
-                             }
-                             catch (Exception)
-                             {
+                     //        }
+                     //        catch (Exception)
+                     //        {
 
 
-                             }
-                         });
+                     //        }
+                     //    });
 
-                     }).GetAwaiter();
+                     //}).GetAwaiter();
 
                  }
                  catch (Exception)
@@ -777,14 +859,32 @@ namespace BEV4
                              if (CurrentScan2 != null && CurrentStr2 != CurrentScan2.ToString()
                              && !string.IsNullOrWhiteSpace(CurrentScan2.ToString()))
                              {
-                                 toolStripStatusLabel6.Text = CurrentScan2.ToString();
+                                 //toolStripStatusLabel6.Text = CurrentScan2.ToString();
+                                 richTextBox35.BeginInvoke((MethodInvoker)delegate { richTextBox35.Text = CurrentScan2.ToString(); });
                                  CurrentStr2 = CurrentScan2.ToString();
                              }
 
                              if (CurrentScan != null && CurrentStr != CurrentScan.ToString()
                              && !string.IsNullOrWhiteSpace(CurrentScan.ToString()))
                              {
-                                 toolStripStatusLabel8.Text = CurrentScan.ToString();
+                                 //toolStripStatusLabel8.Text = CurrentScan.ToString();
+                                 richTextBox35.BeginInvoke((MethodInvoker)delegate 
+                                 {
+                                     if (!richTextBox35.Text.Contains("Scan Finished!"))
+                                     {
+
+                                         richTextBox35.Text += "\n" + "[" +
+                                         (RealTime.RealtimeEventIDsMonitor.iCounter + 1).ToString()
+                                         + " of " +
+                                         RealTime.RealtimeEventIDsMonitor.icounter_Max.ToString() + "]";
+
+                                         richTextBox35.Text += " " + CurrentScan.ToString();
+                                     }
+                                     else
+                                     {
+                                         richTextBox35.Text = CurrentScan.ToString();
+                                     }
+                                 });
                                  CurrentStr = CurrentScan.ToString();
                              }
                          }
@@ -811,8 +911,306 @@ namespace BEV4
           
         }
 
-        private async void T2_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private async Task _Monitor_ScanResults()
         {
+            //await RefreshCurrentScan(RealTime.RealtimeEventIDsMonitor.CurrentScan,
+            //           RealTime.RealtimeEventIDsMonitor.CurrentScan2);
+            //await Task.Run(() =>
+            //{
+            //    BeginInvoke((MethodInvoker)delegate
+            //    {
+            //        RunAsync_RefreshCurrentScan(RealTime.RealtimeEventIDsMonitor.CurrentScan,
+            //        RealTime.RealtimeEventIDsMonitor.CurrentScan2);
+            //    });
+            //});
+
+            await Task.Run(() =>
+            {
+                listView2.BeginInvoke((MethodInvoker)delegate
+                {
+                    try
+                    {
+                        int counts = 0;
+                        List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes> list =
+                       new List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes>();
+
+                        string tmp = "";
+
+                        try
+                        {
+                            toolStripStatusLabel10.BackColor = Color.DarkGray;
+                            if (IsSummary/* && !IsSummary_Details && !t4.Enabled*/)
+                                toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                        }
+                        catch (Exception)
+                        {
+
+                        }
+
+
+                        if (RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table.Count > 0)
+                        {
+                            try
+                            {
+                               
+                                    list = RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table.Where(x =>
+                                          x.ProcessItemsDetectedCount_Score != "0"
+                                       && x.ProcessItemsDetectedCount_Score != null
+                                       && (x.RemoveFlag == false)
+                                       && (Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[0]) >= 2
+                                       || Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2 <
+                                          Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[0])
+                                       || Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2 ==
+                                          Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[0]) / 2
+                                       || (Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[1]) == 2 &&
+                                          Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[0]) >= 1.5 ||
+                                          Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[1]) == 3 &&
+                                          Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[0]) >= 1.5)))
+                                      .ToList();                              
+
+                            }
+                            catch (Exception)
+                            {
+                                /// Exception thrown: 'System.InvalidOperationException' in mscorlib.dll 
+                                /// ("Collection was modified; enumeration operation may not execute.")
+                               
+                                // _Where_HadErrors = true;
+                            }
+
+                            //if (_Where_HadErrors)
+                            //{
+                            //    list = RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table.FindAll(x =>
+                            //          x.ProcessItemsDetectedCount_Score != "0"
+                            //       && x.ProcessItemsDetectedCount_Score != null).ToList()
+                            //       .Where(x => (x.RemoveFlag == false)
+                            //       && (Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[0]) >= 2
+                            //       || Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2 <
+                            //          Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[0])
+                            //       || Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2 ==
+                            //          Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[0]) / 2
+                            //       || (Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[1]) == 2 &&
+                            //          Convert.ToDouble(x.ProcessItemsDetectedCount_Score.Split('/')[0]) >= 1.5)))
+                            //      .ToList();
+
+                            //}
+
+
+                            if (list != null)
+                                counts = list.Count;
+
+                            if (counts != listView2.Items.Count)
+                            {
+                                foreach (RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes items in list)
+                                {
+
+                                    ///
+                                    int __found = RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table.FindIndex(_x =>
+                                    _x._Image == items._Image
+                                     && _x.PID == items.PID
+                                     && _x.CheckingMitreSubItems_Index == items.CheckingMitreSubItems_Index
+                                     && _x.Event_Record_ID == items.Event_Record_ID
+                                     && _x.TechniqueID == items.TechniqueID
+                                     && _x.TechniqueID_Name == items.TechniqueID_Name);
+
+                                    RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes tempstruc = new RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes();
+                                    tempstruc.AddedTime = items.AddedTime;
+                                    tempstruc.CommandTypes = items.CommandTypes;
+                                    tempstruc.Description = items.Description;
+                                    tempstruc.EventTime = items.EventTime;
+                                    tempstruc.IsChecked = items.IsChecked;
+                                    tempstruc.IsDetected = items.IsDetected;
+                                    tempstruc.PID = items.PID;
+                                    tempstruc.ProcessItemsDetectedCount_Score = items.ProcessItemsDetectedCount_Score;
+                                    tempstruc.ProcessName = items.ProcessName;
+                                    tempstruc.ProcessName_Path = items.ProcessName_Path;
+                                    tempstruc.SubItems_ImageIndex = items.SubItems_ImageIndex;
+                                    tempstruc.SubItems_Name_Property = items.SubItems_Name_Property;
+                                    tempstruc.TechniqueID = items.TechniqueID;
+
+                                    tempstruc.TechniqueID_Name = items.TechniqueID_Name;
+                                    tempstruc._CommandLine = items._CommandLine;
+                                    tempstruc._Image = items._Image;
+                                    tempstruc._ParentCommandLine = items._ParentCommandLine;
+                                    tempstruc._EventMessage = items._EventMessage;
+                                    tempstruc.CheckScore = items.CheckScore;
+                                    tempstruc.CheckingMitreSubItems_Index = items.CheckingMitreSubItems_Index;
+                                    tempstruc.Event_Record_ID = items.Event_Record_ID;
+                                    tempstruc.Scan_Loops = items.Scan_Loops;
+                                    tempstruc.MitreAttack_DetectedTechnique_CommandLine = items.MitreAttack_DetectedTechnique_CommandLine;
+                                    tempstruc.BEV_DB_FilePath = items.BEV_DB_FilePath;
+                                    tempstruc.BEV_DB_Version = items.BEV_DB_Version;
+                                    tempstruc.RemoveFlag = true;
+                                    RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table[__found] = tempstruc;
+                                    ///
+                                    //Task.Delay(20);
+                                    Task.Delay(20).GetAwaiter();
+
+                                    if (DetectedList_Listview2.FindIndex(x => x == items.ProcessName + "@" + items.PID.ToString()
+                                           + "@" + items.ProcessItemsDetectedCount_Score.ToString() + items.Event_Record_ID.ToString()
+                                           + " [" + items.CheckingMitreSubItems_Index.ToString() + "]"
+                                           + items.TechniqueID_Name + "@" + items.TechniqueID) == -1)
+                                    {
+
+                                        iList2 = new ListViewItem();
+
+                                        iList2.SubItems.Add(items.EventTime.ToString());
+                                        iList2.SubItems.Add(items.TechniqueID);
+                                        iList2.SubItems.Add(items.TechniqueID_Name);
+                                        iList2.SubItems.Add(items.ProcessItemsDetectedCount_Score.ToString());
+                                        iList2.SubItems.Add(items.CheckingMitreSubItems_Index.ToString());
+                                        iList2.SubItems.Add(items.ProcessName);
+                                        iList2.SubItems.Add(items.PID.ToString());
+                                        iList2.SubItems.Add(items._CommandLine);
+                                        iList2.SubItems.Add(items.Event_Record_ID.ToString());
+                                        iList2.SubItems.Add(items._EventMessage);
+                                        iList2.SubItems.Add(items.MitreAttack_DetectedTechnique_CommandLine.ToLower());
+                                        iList2.SubItems.Add(items.BEV_DB_FilePath.ToLower());
+                                        iList2.SubItems.Add(items.BEV_DB_Version.ToLower());
+                                        iList2.Name = items._EventMessage;
+
+                                        Double a = Convert.ToDouble(items.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2;
+                                        Double b = Convert.ToDouble(items.ProcessItemsDetectedCount_Score.Split('/')[0]);
+
+                                        try
+                                        {
+                                            toolStripStatusLabel10.BackColor = Color.DarkGray;                                          
+
+                                            if (IsSummary/* && !IsSummary_Details && !t4.Enabled*/)
+                                                toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                                + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                        }
+                                        catch (Exception)
+                                        {
+
+                                        }
+
+
+                                        if (a == b / 2)
+                                        {
+                                            iList2.ImageIndex = 9;
+                                            iList2.ForeColor = Color.Red;
+
+                                            if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
+                                            {
+                                                listView2.Items.Add((ListViewItem)iList2.Clone());
+                                                Thread.Sleep(10);
+                                            }
+
+                                            SortedList4_HSTruePositives.Add(iList2);
+                                            SortedList3_HighScore.Add(iList2);
+
+                                            try
+                                            {
+                                                toolStripStatusLabel10.BackColor = Color.DarkGray;
+
+                                                if (IsSummary/* && !IsSummary_Details && !t4.Enabled*/)
+                                                    toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                                    + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                            }
+                                            catch (Exception)
+                                            {
+
+                                            }
+
+                                            /// create event id 2 in BEV4.3 EventLog
+                                            RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object)iList2);
+                                        }
+                                        else 
+                                        if (a < b || (Convert.ToDouble(items.ProcessItemsDetectedCount_Score.Split('/')[1]) == 2 && b >= 1.5))
+                                        {
+
+
+                                            try
+                                            {
+                                                toolStripStatusLabel10.BackColor = Color.DarkGray;
+
+                                                if (IsSummary/* && !IsSummary_Details && !t4.Enabled*/)
+                                                    toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                                    + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                            }
+                                            catch (Exception)
+                                            {
+
+                                            }
+
+                                            iList2.ImageIndex = 9;
+                                            iList2.ForeColor = Color.DarkOrange;
+
+                                            if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
+                                            {
+                                                listView2.Items.Add((ListViewItem)iList2.Clone());
+                                                Thread.Sleep(10);
+                                            }
+
+                                            SortedList3_HighScore.Add(iList2);
+                                            /// create event id 2 in BEV4.3 EventLog
+                                            RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object)iList2);
+
+                                        }
+                                        else
+                                        {
+
+                                            try
+                                            {
+                                                toolStripStatusLabel10.BackColor = Color.DarkGray;
+
+                                                if (IsSummary/* && !IsSummary_Details && !t4.Enabled*/)
+                                                    toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                                    + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                            }
+                                            catch (Exception)
+                                            {
+
+                                            }
+
+                                            iList2.ImageIndex = 10;
+                                            iList2.ForeColor = Color.Black;
+
+                                            if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
+                                            {
+                                                listView2.Items.Add((ListViewItem)iList2.Clone());
+                                                Thread.Sleep(10);
+                                                /// create event id 3 in BEV4.3 EventLog
+                                                RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog2((object)iList2);
+
+                                            }
+                                        }
+
+                                        tmp = iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text;
+                                        a = 0;
+                                        b = 0;
+                                        Task.Delay(5);
+
+                                        DetectedList_Listview2.Add(items.ProcessName + "@" + items.PID.ToString()
+                                             + "@" + items.ProcessItemsDetectedCount_Score.ToString() + items.Event_Record_ID.ToString()
+                                             + " [" + items.CheckingMitreSubItems_Index.ToString() + "]"
+                                             + items.TechniqueID_Name + "@" + items.TechniqueID);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                });
+            });
+        }
+
+        private async void RunAsync__Monitor_ScanResults()
+        {
+            await _Monitor_ScanResults();
+        }
+        private void T2_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            ////await Task.Run(() =>
+            ////{
+                  BeginInvoke((MethodInvoker)delegate { RunAsync__Monitor_ScanResults(); });
+            ////});
+
+
 
             //Delegate _RefreshCurrentScan = ((MethodInvoker)delegate
             //{
@@ -824,234 +1222,7 @@ namespace BEV4
             //System.Runtime.CompilerServices.TaskAwaiter _Task =
             //    Task.Run(() => { _RefreshCurrentScan.DynamicInvoke(); }).GetAwaiter();
 
-            await RefreshCurrentScan(RealTime.RealtimeEventIDsMonitor.CurrentScan,
-                          RealTime.RealtimeEventIDsMonitor.CurrentScan2);
-
-            await Task.Run(() =>
-            {
-                listView2.BeginInvoke((MethodInvoker)delegate
-                 {
-                     try
-                     {
-                         int counts = 0;
-                         List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes> list =
-                        new List<RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes>();
-
-                         string tmp = "";
-
-                         try
-                         {
-                             toolStripStatusLabel10.BackColor = Color.DarkGray;                           
-                             if (IsSummary && !IsSummary_Details && !t4.Enabled)
-                                 toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
-                                 + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
-                         }
-                         catch (Exception)
-                         {
-
-                         }
-
-
-                         if (RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table.Count > 0)
-                         {
-                             try
-                             {                               
-                                 //list = RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table
-                                 //.OrderBy(x => x.TechniqueID_Name).Distinct()
-                                 //.ToList()
-                                 //.FindAll(x => Convert.ToInt32(x.ProcessItemsDetectedCount_Score.Split('/')[0]) >= 2)
-                                 //.ToList();
-
-                                 list = RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table.FindAll(x =>
-                                       x.ProcessItemsDetectedCount_Score != "0" 
-                                    && x.ProcessItemsDetectedCount_Score != null)
-                                 .FindAll(x => Convert.ToInt32(x.ProcessItemsDetectedCount_Score.Split('/')[0]) >= 2
-                                    || Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2 <
-                                       Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[0])
-                                    || Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2 ==
-                                       Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[0]) / 2 )
-                                   //.OrderBy(x => x.TechniqueID_Name)
-                                   .ToList();
-                                                                      
-                             }
-                             catch (Exception)
-                             {
-
-                             }
-
-                             if (list != null)
-                                 counts = list.Count;
-
-                             if (counts != listView2.Items.Count)
-                             {
-                                 foreach (RealTime.RealtimeEventIDsMonitor._TableOfSysmon_Processes items in list)
-                                 {
-                                     //Task.Delay(20);
-                                     Task.Delay(20).GetAwaiter();
-
-                                     if (DetectedList_Listview2.FindIndex(x => x == items.ProcessName + "@" + items.PID.ToString()
-                                            + "@" + items.ProcessItemsDetectedCount_Score.ToString() + items.Event_Record_ID.ToString()
-                                            + " [" + items.CheckingMitreSubItems_Index.ToString() + "]"
-                                            + items.TechniqueID_Name + "@" + items.TechniqueID) == -1)
-                                     {
-
-                                         iList2 = new ListViewItem();
-
-                                         iList2.SubItems.Add(items.EventTime.ToString());
-                                         iList2.SubItems.Add(items.TechniqueID);
-                                         iList2.SubItems.Add(items.TechniqueID_Name);
-                                         iList2.SubItems.Add(items.ProcessItemsDetectedCount_Score.ToString());
-                                         iList2.SubItems.Add(items.CheckingMitreSubItems_Index.ToString());
-                                         iList2.SubItems.Add(items.ProcessName);
-                                         iList2.SubItems.Add(items.PID.ToString());
-                                         iList2.SubItems.Add(items._CommandLine);
-                                         iList2.SubItems.Add(items.Event_Record_ID.ToString());
-                                         iList2.SubItems.Add(items._EventMessage);
-                                         iList2.Name = items._EventMessage;
-
-                                         float a = Convert.ToSingle(items.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2;
-                                         float b = Convert.ToSingle(items.ProcessItemsDetectedCount_Score.Split('/')[0]);
-
-                                         try
-                                         {
-                                             toolStripStatusLabel10.BackColor = Color.DarkGray;
-
-                                       //      if (!IsSummery && !IsSummery_Details)
-                                       //      {
-                                       //          var obj = RealTime.RealtimeEventIDsMonitor.Sysmon_Process_Table.FindAll(x =>
-                                       //      x.ProcessItemsDetectedCount_Score != "0"
-                                       //   && x.ProcessItemsDetectedCount_Score != null)
-                                       //.FindAll(x => Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[1]) / 2 ==
-                                       //      Convert.ToSingle(x.ProcessItemsDetectedCount_Score.Split('/')[0]) / 2)
-                                       //  .OrderBy(x => x.TechniqueID_Name).Last();
-                                  
-                                       //          toolStripStatusLabel10.Text = "Note: TechniqueID (" + obj.TechniqueID + ") with High Score ["
-                                       //                 + obj.ProcessItemsDetectedCount_Score.ToString()+ "] Detected for Process"
-                                       //                 + obj.ProcessName_Path.Replace('\r', ' ') + " (PID:" + obj.PID.ToString() + ")";
-                                       //      }
-                                       //      else
-
-                                             if (IsSummary && !IsSummary_Details && !t4.Enabled)
-                                                 toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
-                                                 + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
-                                         }
-                                         catch (Exception)
-                                         {
-
-                                         }
-
-
-                                         if (a == b / 2)
-                                         {
-                                             iList2.ImageIndex = 9;
-                                             iList2.ForeColor = Color.Red;
-
-                                             if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
-                                             {
-                                                 listView2.Items.Add((ListViewItem)iList2.Clone());
-                                                 Thread.Sleep(10);
-                                             }
-
-                                             SortedList4_HSTruePositives.Add(iList2);
-                                             SortedList3_HighScore.Add(iList2);
-
-                                             try
-                                             {
-                                                 toolStripStatusLabel10.BackColor = Color.DarkGray;
-
-                                                 if (IsSummary && !IsSummary_Details && !t4.Enabled)
-                                                     toolStripStatusLabel10.Text = "Detection Summary: FullScore Detection: [" + SortedList4_HSTruePositives.Count.ToString()
-                                                     + "] , HighScore Detection: [" + SortedList3_HighScore.Count.ToString() + "]";
-                                             }
-                                             catch (Exception)
-                                             {
-
-                                             }
-
-                                             /// create event id 2 in BEV4.3 EventLog
-                                             RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object)iList2);
-                                         }
-                                         else
-                                            if (a < b)
-                                         {
-
-
-                                             try
-                                             {
-                                                 toolStripStatusLabel10.BackColor = Color.DarkGray;
-
-                                                 if (IsSummary && !IsSummary_Details && !t4.Enabled)
-                                                     toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
-                                                     + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
-                                             }
-                                             catch (Exception)
-                                             {
-
-                                             }
-
-                                             iList2.ImageIndex = 9;
-                                             iList2.ForeColor = Color.DarkOrange;
-
-                                             if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
-                                             {
-                                                 listView2.Items.Add((ListViewItem)iList2.Clone());
-                                                 Thread.Sleep(10);
-                                             }
-
-                                             SortedList3_HighScore.Add(iList2);
-                                             /// create event id 2 in BEV4.3 EventLog
-                                             RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object)iList2);
-
-                                         }
-                                         else
-                                         {
-
-                                             try
-                                             {
-                                                 toolStripStatusLabel10.BackColor = Color.DarkGray;
-
-                                                 if (IsSummary && !IsSummary_Details && !t4.Enabled)
-                                                     toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
-                                                     + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
-                                             }
-                                             catch (Exception)
-                                             {
-
-                                             }
-
-                                             iList2.ImageIndex = 10;
-                                             iList2.ForeColor = Color.Black;
-
-                                             if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
-                                             {
-                                                 listView2.Items.Add((ListViewItem)iList2.Clone());
-                                                 Thread.Sleep(10);
-                                                 /// create event id 3 in BEV4.3 EventLog
-                                                 RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog2((object)iList2);
-
-                                             }
-                                         }
-
-                                         tmp = iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text;
-                                         a = 0;
-                                         b = 0;
-                                         Task.Delay(5);
-
-                                         DetectedList_Listview2.Add(items.ProcessName + "@" + items.PID.ToString()
-                                              + "@" + items.ProcessItemsDetectedCount_Score.ToString() + items.Event_Record_ID.ToString()
-                                              + " [" + items.CheckingMitreSubItems_Index.ToString() + "]"
-                                              + items.TechniqueID_Name + "@" + items.TechniqueID);
-                                     }
-                                 }
-                             }
-                         }
-                     }
-                     catch (Exception)
-                     {
-
-                     }
-                 });
-            });
+         
 
         }
 
@@ -2530,6 +2701,7 @@ namespace BEV4
 
                 }
                 tabControl2.SelectedIndex = 2;
+                tabControl4.SelectedIndex = 0;
                 startRealtimeMonitorToolStripMenuItem.Checked = true;
                 stopMonitorToolStripMenuItem.Checked = false;
                 IsRealTimeOn = true;
@@ -2598,14 +2770,17 @@ namespace BEV4
                 string _TechniqueID = listView2.SelectedItems[0].SubItems[2].Text.ToString();
                 string _TechniqueID_Name = listView2.SelectedItems[0].SubItems[3].Text.ToString();
                 string _DetectionScore = listView2.SelectedItems[0].SubItems[4].Text.ToString();
-                string _TechniqueID_SubItems_IndexData = listView2.SelectedItems[0].SubItems[5].Text.ToString();
+                string _DB_SubItemIndex = listView2.SelectedItems[0].SubItems[5].Text.ToString();
                 string _ProcessName = listView2.SelectedItems[0].SubItems[6].Text.ToString();
                 string _ProcessName_ID = listView2.SelectedItems[0].SubItems[7].Text.ToString();
                 string _ProcessCommandLine = listView2.SelectedItems[0].SubItems[8].Text.ToString();
-
+                string _DB_LastUpdate_Version = listView2.SelectedItems[0].SubItems[13].Text.ToString();
+                string _DB_LastUpdate_FilePath = listView2.SelectedItems[0].SubItems[12].Text.ToString();
+                string _DB_DetectecTechnique_CommandLine = listView2.SelectedItems[0].SubItems[11].Text.ToString();
                 float a = Convert.ToSingle(listView2.SelectedItems[0].SubItems[4].Text.ToString().Split('/')[1]) / 2;
                 float b = Convert.ToSingle(listView2.SelectedItems[0].SubItems[4].Text.ToString().Split('/')[0]);
                 string FalsePositive = "";
+
                 if(a == b / 2)
                 {
                     FalsePositive = "Probably this Event is True Positive!";
@@ -2625,7 +2800,9 @@ namespace BEV4
                     + "\nTechnique ID: " + _TechniqueID
                     + "\nTechnique ID Name: " + _TechniqueID_Name
                     + "\nDetection Score: " + _DetectionScore
-                    + "\nDB SubItems_Index: " + _TechniqueID_SubItems_IndexData
+                    + "\nDB SubItems_Index: " + _DB_SubItemIndex
+                    + "\nDB LastUpdate File: " + _DB_LastUpdate_FilePath
+                    + "\nDB LastUpdate ver: " + _DB_LastUpdate_Version
                     + "\nDetected Process Name: " + _ProcessName
                     + "\nDetected Process ID: " + _ProcessName_ID
                     + "\nDetected Process CommandLine: " + _ProcessCommandLine
@@ -2633,23 +2810,41 @@ namespace BEV4
                     + "\n------------------------------\nDetection False/True Positive: " + FalsePositive;
                 try
                 {
-                    DataTable TempTable = Master_Value.MasterValueClass.table_MitreAttackTechniques;
-                    DataRow[] dts = TempTable.Select("Record_SubItemIndex = " + Convert.ToInt32(_TechniqueID_SubItems_IndexData));
-                    string TechniqueId_Command_Details_DB_Index = dts[0].ItemArray[0].ToString();
-                    string TechniqueId_Command_Details_DisplayName = dts[0].ItemArray[1].ToString();
-                    string TechniqueId_Command_Details_TechniqueID = dts[0].ItemArray[2].ToString();
-                    string TechniqueId_Command_Details_Command_Str = dts[0].ItemArray[4].ToString();
+                    //DataTable TempTable = Master_Value.MasterValueClass.table_MitreAttackTechniques;
+                    //DataRow[] dts = TempTable.Select("Record_SubItemIndex = " + Convert.ToInt32(_TechniqueID_SubItems_IndexData));
+                    //string TechniqueId_Command_Details_DB_Index = dts[0].ItemArray[0].ToString();
+                    //string TechniqueId_Command_Details_DisplayName = dts[0].ItemArray[1].ToString();
+                    //string TechniqueId_Command_Details_TechniqueID = dts[0].ItemArray[2].ToString();
+                    //string TechniqueId_Command_Details_Command_Str = dts[0].ItemArray[4].ToString();
+
+                    //richTextBox7.Text += "\n------------------------------"
+                    //    + "\n\nNote: YOU Can Check False Positive Detection via Compare \"1.Your Event CommandLine\" with \"2.Detected Technique CommandLine\".\n\n"
+                    //    + "TechniqueID: " + TechniqueId_Command_Details_TechniqueID + "\n"
+                    //    + "Technique Name: " + TechniqueId_Command_Details_DisplayName + "\n"
+                    //    + "1.DETECTED TECHNIQUE CommandLine ==> " + TechniqueId_Command_Details_Command_Str + "\n"
+                    //    + "2.YOUR EVENT CommandLine ==>" + _ProcessCommandLine;
+
+
+                    //string TechniqueId_Command_Details_DB_Index = _DB_SubItemIndex;
+                    //string TechniqueId_Command_Details_DisplayName = _TechniqueID_Name;
+                    //string TechniqueId_Command_Details_TechniqueID = _TechniqueID;
+                    //string TechniqueId_Command_Details_Command_Str = _DB_DetectecTechnique_CommandLine;
 
                     richTextBox7.Text += "\n------------------------------"
                         + "\n\nNote: YOU Can Check False Positive Detection via Compare \"1.Your Event CommandLine\" with \"2.Detected Technique CommandLine\".\n\n"
-                        + "TechniqueID: " + TechniqueId_Command_Details_TechniqueID + "\n"
-                        + "Technique Name: " + TechniqueId_Command_Details_DisplayName + "\n"
-                        + "1.DETECTED TECHNIQUE CommandLine ==> " + TechniqueId_Command_Details_Command_Str + "\n"
+                        + "TechniqueID: " + _TechniqueID + "\n"
+                        + "Technique Name: " + _TechniqueID_Name + "\n"
+                        + "1.DETECTED TECHNIQUE CommandLine ==> " + _DB_DetectecTechnique_CommandLine + "\n"
                         + "2.YOUR EVENT CommandLine ==>" + _ProcessCommandLine;
                 }
                 catch (Exception)
                 {
-
+                    richTextBox7.Text += "\n------------------------------"
+                        + "\n\nDataBase Error Detected!, index of Details Detection in DB has ERROR\nif your DB Updated with \"new *.md\" file or via \"new *.txt\" file"
+                        + "\nyou will get this error! that because some INDEX in new DB was changed for some records.\n\n"
+                        + "Note:this ERROR more often occurs When you have/had some Detection via using \"Atomic-red-team\" *.md file! then update real-time database via your own txt file or vice versa"
+                        + " so old detection by first DB updates may has wrong Index in new DB updates!, this application has two type of updates so please use one of them only"
+                        + " at the same time using both methods is not good idea and you will have ERRORS like this ;D";
 
                 }
 
@@ -2826,7 +3021,8 @@ namespace BEV4
                         if (item.StartsWith("- [T"))
                         {
                             /// ting](../../T1558.004/T1558.004.md)
-                            filename = item.Split('(')[1].Split(')')[0];
+                            //filename = item.Split('(')[1].Split(')')[0];
+                            filename = item.Split(']')[1].Split('(')[1].Split(')')[0];
                             filename = filename.Substring(0, filename.Length - 2);
                             filename = filename + "yaml";
 
@@ -2850,7 +3046,7 @@ namespace BEV4
                 richTextBox1.Text = "";
                 IsFilteringMode_Mittre_EID1 = true;
 
-                Task _SearchTask = Mitre_Attack.MitreAttackClass.MakeSimpleTextFile_AllCommandPrompts(AllMitreAttackIndeXEDtechniqueIds
+                Task _SearchTask = Mitre_Attack.MitreAttackClass.UpdateDB_and_MakeSimpleTextFile_AllCommandPrompts(false,AllMitreAttackIndeXEDtechniqueIds
                    .ToList<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>().ToArray<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>());
                 await _SearchTask.ConfigureAwait(true);
 
@@ -2863,6 +3059,7 @@ namespace BEV4
                     }
 
                 } while (!_SearchTask.IsCompleted);
+
 
             }
             catch (Exception eee)
@@ -3041,6 +3238,444 @@ namespace BEV4
                 + ".csv\"";
 
             richTextBox34.Text = TempScript;
+        }
+
+        private async void UpdateAtomicRedTeamDatabaseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+               
+                List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items> AllMitreAttackIndeXEDtechniqueIds
+                    = new List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>();
+
+                OpenFileDialog ofd2 = new OpenFileDialog();
+
+                ofd2.Filter = "md files (windows-index.md)|windows-index.md";
+                ofd2.FilterIndex = 0;
+                ofd2.ShowDialog();
+                string targetfile2 = ofd2.FileName;
+                ofd2.RestoreDirectory = true;
+                string _dir = ofd2.InitialDirectory;
+                string dump;
+
+                /// checking md file last update/modify date
+                FileInfo Finfo = new FileInfo(targetfile2);
+                string FI_lastwrite = Finfo.LastWriteTime.ToString();
+                groupBox25.Text = "Atomic-Red-Team DB, (Last Updated: windows-index.md " + FI_lastwrite + ")";
+
+                using (StreamReader sw = new StreamReader(targetfile2))
+                {
+                    dump = sw.ReadToEnd();
+                    sw.Close();
+                }
+
+                string[] listAll = dump.Split('\n');
+                int[] indexAll = Mitre_Attack.MitreAttackClass._FindAllIndex("- [T", dump, 0);
+                string filename = "";
+                string[] PATH = targetfile2.Split('\\');
+                int INDEXPATH = PATH.Length - 2;
+                string finalpath = "";
+
+                for (int i = 0; i <= INDEXPATH; i++)
+                {
+                    finalpath += PATH[i] + "\\";
+                }
+
+                foreach (string item in listAll)
+                {
+                    try
+                    {
+                        if (item.StartsWith("- [T"))
+                        {
+                            /// ting](../../T1558.004/T1558.004.md)
+                            filename = item.Split('(')[1].Split(')')[0];
+                            filename = filename.Substring(0, filename.Length - 2);
+                            filename = filename + "yaml";
+
+                            if (!filename.StartsWith("https://"))
+                                mitre.DumpYamlInfo(finalpath + filename);
+
+                            foreach (Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items xitem in Mitre_Attack.MitreAttackClass.MitreAttackList_Array_Copy)
+                            {
+                                if (xitem.CommandTypes.Contains("command_prompt") || xitem.CommandTypes.Contains("powershell"))
+                                    AllMitreAttackIndeXEDtechniqueIds.Add(xitem);
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+
+
+                    }
+                }
+
+                richTextBox1.Text = "";
+                IsFilteringMode_Mittre_EID1 = true;
+
+                Master_Value.MasterValueClass.table_MitreAttackTechniques.Clear();
+
+                Task _SearchTask = Mitre_Attack.MitreAttackClass.UpdateDB_and_MakeSimpleTextFile_AllCommandPrompts(true,AllMitreAttackIndeXEDtechniqueIds
+                   .ToList<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>().ToArray<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>());
+                await _SearchTask.ConfigureAwait(true);
+
+                do
+                {
+                    Thread.Sleep(10);
+                    if (_SearchTask.IsCompleted)
+                    {
+                        break;
+                    }
+
+                } while (!_SearchTask.IsCompleted);
+
+                dataGridView7.DataSource = Master_Value.MasterValueClass.table_MitreAttackTechniques;
+                _Is_DB_Updated = true;
+                if (_Is_DB_Updated)
+                    MessageBox.Show("Real-time DB updated via Atomic-Red-Team windows-index.md file:\n"
+                        + "(Last Updated: windows-index.md " + FI_lastwrite + ")"
+                        , "Mitre Attack Real-time (Database Updated!)");
+            }
+            catch (Exception eee)
+            {
+                _Is_DB_Updated = false;
+                MessageBox.Show(eee.Message);
+            }
+        }
+
+        private async void UpdateDatabaseviaAtomicRedTeamWindowsIndexmdFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+
+                List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items> AllMitreAttackIndeXEDtechniqueIds
+                    = new List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>();
+
+                OpenFileDialog ofd2 = new OpenFileDialog();
+
+                ofd2.Filter = "md files (windows-index.md)|windows-index.md";
+                ofd2.FilterIndex = 0;
+                ofd2.ShowDialog();
+                string targetfile2 = ofd2.FileName;
+                ofd2.RestoreDirectory = true;
+                string _dir = ofd2.InitialDirectory;
+                string dump;
+
+                /// checking md file last update/modify date
+                FileInfo Finfo = new FileInfo(targetfile2);
+                string FI_lastwrite = Finfo.LastWriteTime.ToString();                
+                groupBox25.BeginInvoke((MethodInvoker)delegate 
+                { groupBox25.Text = "Atomic-Red-Team DB, (Last Updated: windows-index.md " + FI_lastwrite + ")"; });
+
+                using (StreamReader sw = new StreamReader(targetfile2))
+                {
+                    dump = sw.ReadToEnd();
+                    sw.Close();
+                }
+
+                string[] listAll = dump.Split('\n');
+                int[] indexAll = Mitre_Attack.MitreAttackClass._FindAllIndex("- [T", dump, 0);
+                string filename = "";
+                string[] PATH = targetfile2.Split('\\');
+                int INDEXPATH = PATH.Length - 2;
+                string finalpath = "";
+
+                for (int i = 0; i <= INDEXPATH; i++)
+                {
+                    finalpath += PATH[i] + "\\";
+                }
+
+                foreach (string item in listAll)
+                {
+                    try
+                    {
+                        if (item.StartsWith("- [T"))
+                        {
+                            /// ting](../../T1558.004/T1558.004.md)
+                            /// - [T1037.001 Logon Script (Windows)](../../T1037.001/T1037.001.md)
+                            filename = item.Split(']')[1].Split('(')[1].Split(')')[0];
+                            filename = filename.Substring(0, filename.Length - 2);
+                            filename = filename + "yaml";
+
+                            if (!filename.StartsWith("https://"))
+                                mitre.DumpYamlInfo(finalpath + filename);
+
+                            foreach (Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items xitem in Mitre_Attack.MitreAttackClass.MitreAttackList_Array_Copy)
+                            {
+                                if (xitem.CommandTypes.Contains("command_prompt") || xitem.CommandTypes.Contains("powershell"))
+                                    AllMitreAttackIndeXEDtechniqueIds.Add(xitem);
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+
+
+                    }
+                }
+
+                richTextBox1.Text = "";
+                IsFilteringMode_Mittre_EID1 = true;
+
+                _Is_DB_Records_Updated = true;
+                Thread.Sleep(2000);
+                Master_Value.MasterValueClass.table_MitreAttackTechniques.Clear();
+                /// delay >= 2 seconds is improtant
+                Thread.Sleep(2000);
+
+                Task _DBUpdateTask = Mitre_Attack.MitreAttackClass.UpdateDB_and_MakeSimpleTextFile_AllCommandPrompts(true, AllMitreAttackIndeXEDtechniqueIds
+                   .ToList<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>().ToArray<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>());
+                await _DBUpdateTask.ConfigureAwait(true);
+
+                do
+                {
+                    Thread.Sleep(50);
+                    if (_DBUpdateTask.IsCompleted)
+                    {
+                        break;
+                    }
+
+                } while (!_DBUpdateTask.IsCompleted);
+
+                dataGridView7.DataSource = Master_Value.MasterValueClass.table_MitreAttackTechniques;
+                _Is_DB_Updated = true;
+                if (_Is_DB_Updated)
+                {
+                    await Task.Run(() =>
+                    {
+                        _DB_CurrentVersion = "DB Update ver: " + "(" + ofd2.SafeFileName + " " + FI_lastwrite + ")";
+                        _DB_CurrentVersion_FilePath = ofd2.FileName.ToLower();
+                        string Logs = "Real-time DB updated via Atomic-Red-Team windows-index.md file: "
+                            + "(Last Updated: windows-index.md " + FI_lastwrite + ")"
+                            + ", Mitre Attack Real-time (Database Updated!)";
+                        richTextBox37.BeginInvoke((MethodInvoker)delegate
+                        {
+                            richTextBox37.Text += "Time: " + DateTime.Now.ToString() + " => " + Logs + "\n";
+                        });
+
+                        try
+                        {
+
+                            if (!EventLog.Exists("BEV4.3"))
+                            {
+                                EventSourceCreationData ESCD = new EventSourceCreationData("BEV_4", "BEV4.3");
+                                System.Diagnostics.EventLog.CreateEventSource(ESCD);
+
+                            }
+
+                            BEV4 = new EventLog("BEV4.3", ".", "BEV_4");
+                            BEV4.WriteEntry("BEV4 MitreAttack Real-time DB Updated (Method1, update via Atomic-Red-Team md file): \n"
+                                + _DB_CurrentVersion
+                                + "\nDB File Path => " + ofd2.FileName.ToLower(), EventLogEntryType.Information, 255);
+                        }
+                        catch (Exception ee)
+                        {
+
+                        }
+
+                        MessageBox.Show("Real-time DB updated via Atomic-Red-Team windows-index.md file:\n"
+                            + "(Last Updated: windows-index.md " + FI_lastwrite + ")"
+                            , "Mitre Attack Real-time (Database Updated!)");
+                    });
+                }
+                _Is_DB_Records_Updated = false;
+                
+            }
+            catch (Exception eee)
+            {
+                _Is_DB_Updated = false;
+                MessageBox.Show(eee.Message);
+            }
+        }
+
+        private async void UpdateDatabaseviaYourOwnYamlFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+
+                List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items> _YourOwnDB_TechniqueIDs
+                       = new List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>();
+
+                OpenFileDialog ofd2 = new OpenFileDialog();
+
+                ofd2.Filter = "text files (MyDataBase.txt)|*.txt";
+                ofd2.FilterIndex = 0;
+                ofd2.ShowDialog();
+                string targetfile2 = ofd2.FileName;
+                ofd2.RestoreDirectory = true;
+                string _dir = ofd2.InitialDirectory;
+                string dump;
+
+                /// checking md file last update/modify date
+                FileInfo Finfo = new FileInfo(targetfile2);
+                string FI_lastwrite = Finfo.LastWriteTime.ToString();
+                groupBox25.BeginInvoke((MethodInvoker)delegate
+                { groupBox25.Text = "Your own DB, (Last Updated: " + ofd2.SafeFileName + " " + FI_lastwrite + ")"; });
+
+                using (StreamReader sw = new StreamReader(targetfile2))
+                {
+                    dump = sw.ReadToEnd();
+                    sw.Close();
+                }
+
+                string[] listAll_Techniques = dump.Split('\n');
+                int[] indexAll = Mitre_Attack.MitreAttackClass._FindAllIndex("attack_technique:", dump, 0);
+                int ItemIndex = 0;
+                //attack_technique: Txxxx.xx1
+                //display_name: your name which you want! (cmd)
+                //simple_description: Simple Description for some attacks detected by You
+                //type: command_prompt
+                //cmdlines: 2
+                //commands: cmd.exe /c net user /domain
+                //commands: cmd.exe /c net user
+                string tmp = "";
+                string TechId = "";
+                string DispName = "";
+                string SimpleDes = "";
+                string type = "";
+                string cmds = "";
+                foreach (string item in listAll_Techniques)
+                {
+                    try
+                    {
+                        if (item.ToLower().StartsWith("attack_technique:") && item.ToLower() != tmp)
+                        {
+                            TechId = listAll_Techniques[ItemIndex];
+                            if (listAll_Techniques[ItemIndex + 1].ToLower().StartsWith("display_name:"))
+                                DispName = listAll_Techniques[ItemIndex + 1].Substring(13);
+                            if (listAll_Techniques[ItemIndex + 2].ToLower().StartsWith("simple_description:"))
+                                SimpleDes = listAll_Techniques[ItemIndex + 2].Substring(19);
+                            if (listAll_Techniques[ItemIndex + 3].ToLower().StartsWith("type:"))
+                                type = listAll_Techniques[ItemIndex + 3].Substring(5);
+                            if (listAll_Techniques[ItemIndex + 4].ToLower().StartsWith("commands:"))
+                                cmds = listAll_Techniques[ItemIndex + 4].Substring(9);
+                            int cmdlines = ItemIndex + 4;
+                            bool init = true;
+                            do
+                            {
+                                cmdlines++;
+
+                                if (init)
+                                    _YourOwnDB_TechniqueIDs.Add(new Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items
+                                    {
+                                        Attack_technique_ID = TechId.Replace('\n', ' ').Replace('\r', ' '),
+                                        Name = "       " + DispName.Replace('\n', ' ').Replace('\r', ' '),
+                                        Description = SimpleDes.Replace('\n', ' ').Replace('\r', ' '),
+                                        CommandTypes = type.Replace('\n', ' ').Replace('\r', ' '),
+                                        CommandPrompt = "     " + cmds
+                                    });
+
+                                /// because of these codes line(455) in RealtimeEventIDsMonitor.cs
+                                /// 455:    if (Form1._Is_DB_Updated)
+                                ///         FullScore_counts2 = attack_technique_Commands_sub_Items.Length - 5;
+                                ///         else if (!Form1._Is_DB_Updated)
+                                ///         FullScore_counts2 = attack_technique_Commands_sub_Items.Length - 6;
+                                ///         
+                                ///  you need 5 whitespaces for DB Updates via text files (which made by users)
+                                ///
+                                /// CommandPrompt = "     " + cmds
+                                /// CommandPrompt = "     " + listAll_Techniques[cmdlines].Substring(9)
+
+                                init = false;
+
+                                if (listAll_Techniques[cmdlines].ToLower().StartsWith("commands:"))
+                                {
+                                    _YourOwnDB_TechniqueIDs.Add(new Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items
+                                    {
+                                        Attack_technique_ID = TechId.Replace('\n', ' ').Replace('\r', ' '),
+                                        Name = "       " + DispName.Replace('\n', ' ').Replace('\r', ' '),
+                                        Description = SimpleDes.Replace('\n', ' ').Replace('\r', ' '),
+                                        CommandTypes = type.Replace('\n', ' ').Replace('\r', ' '),
+                                        CommandPrompt = "     " + listAll_Techniques[cmdlines].Substring(9)
+                                    });
+                                }
+                                else break;
+
+                                Thread.Sleep(50);
+
+                            } while (true);
+
+                            tmp = item.ToLower();
+
+                        }
+
+                        ItemIndex++;
+                    }
+                    catch (Exception)
+                    {
+
+
+                    }
+                }
+
+                _Is_DB_Records_Updated = true;
+                Thread.Sleep(2000);
+                Master_Value.MasterValueClass.table_MitreAttackTechniques.Clear();
+                Thread.Sleep(2000);
+
+                Task _DBUpdateTask = Mitre_Attack.MitreAttackClass.UpdateDB_via_SimpleTextFile(true, _YourOwnDB_TechniqueIDs
+                   .ToList<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>().ToArray<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>());
+                await _DBUpdateTask.ConfigureAwait(true);
+
+                do
+                {
+                    Thread.Sleep(50);
+                    if (_DBUpdateTask.IsCompleted)
+                    {
+                        break;
+                    }
+
+                } while (!_DBUpdateTask.IsCompleted);
+
+                dataGridView7.DataSource = Master_Value.MasterValueClass.table_MitreAttackTechniques;
+                _Is_DB_Updated = true;
+                if (_Is_DB_Updated)
+                {
+                    await Task.Run(() =>
+                    {
+                        _DB_CurrentVersion = "DB Update ver: " + "(" + ofd2.SafeFileName + " " + FI_lastwrite + ")";
+                        _DB_CurrentVersion_FilePath = ofd2.FileName.ToLower();
+                        string Logs = "Real-time DB updated via your own text file: "
+                            + "(Last Updated: " + ofd2.SafeFileName + " " + FI_lastwrite + ")"
+                            + ", Mitre Attack Real-time (Database Updated!)";
+                        richTextBox37.BeginInvoke((MethodInvoker)delegate
+                        {
+                            richTextBox37.Text += "Time: " + DateTime.Now.ToString() + " => " + Logs + "\n";
+                        });
+
+                        MessageBox.Show("Real-time DB updated via your own text file:\n"
+                            + "(Last Updated: " + ofd2.SafeFileName + " " + FI_lastwrite + ")"
+                            , "Mitre Attack Real-time (Database Updated!)");
+
+                        try
+                        {
+
+                            if (!EventLog.Exists("BEV4.3"))
+                            {
+                                EventSourceCreationData ESCD = new EventSourceCreationData("BEV_4", "BEV4.3");
+                                System.Diagnostics.EventLog.CreateEventSource(ESCD);
+
+                            }
+
+                            BEV4 = new EventLog("BEV4.3", ".", "BEV_4");
+                            BEV4.WriteEntry("BEV4 MitreAttack Real-time DB Updated (Method2, update via simple text DB file): \n"
+                                + _DB_CurrentVersion
+                                + "\nDB File Path => " + ofd2.FileName.ToLower(), EventLogEntryType.Information, 254);
+                        }
+                        catch (Exception ee)
+                        {
+
+                        }
+                    });
+                }
+                _Is_DB_Records_Updated = false;
+                
+            }
+            catch (Exception eee)
+            {
+
+                _Is_DB_Updated = false;
+                MessageBox.Show(eee.Message);
+            }
         }
     }
 }
