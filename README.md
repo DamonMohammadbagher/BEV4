@@ -21,7 +21,6 @@ Note: in this code some yaml files (atomic-red-team yaml files) added to source 
 ------------
 
 ```diff
-
 !Note: in BEV4 new version [v4.3.247.298] you can update BEV Database for MitreAttack Real-time Scanner via two methods:
 
 ! 1.via Simple text DB file (your own DB)
