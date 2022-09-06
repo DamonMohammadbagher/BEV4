@@ -4,7 +4,8 @@
 
  ```diff 
  + last source/exe update(7) new version [v4.3.247.298] [Sep 06, 2022]... , 
- + in update7, BEV4 ver [v4.3.247.298] you can update BEV4 Database for MitreAttack Real-time Scanner via two methods [1.via Simple text file , 2.via Atomic-Red-Team md file]
+ + in update7, BEV4 ver [v4.3.247.298] you can update BEV4 Database for MitreAttack Real-time Scanner via two methods:
+ + DB Update method: 1.via Simple text file , 2.via Atomic-Red-Team md file
  ```
  
  BEV4 is Event Monitor tool (real-time & search) some simple things like Atomic-red-team yaml file added for test & Real time detection for some type of attack and ...
