@@ -2678,3 +2678,4 @@
 7343: [- name: Octopus Scanner Malware Open Source Supply Chain] [attack_technique: T1195] [    command: |]
 7344: [- name: Octopus Scanner Malware Open Source Supply Chain] [attack_technique: T1195] [      copy %temp%\ExplorerSync.db %temp%\..\Microsoft\ExplorerSync.db]
 7345: [- name: Octopus Scanner Malware Open Source Supply Chain] [attack_technique: T1195] [      schtasks /create /tn ExplorerSync /tr "javaw -jar %temp%\..\Microsoft\ExplorerSync.db" /sc MINUTE /f]
+
