@@ -8015,6 +8015,7 @@ endoffile
         {
             try
             {
+                
                 row_MitreAttackTechniques = SearchTable.NewRow();
                 row_MitreAttackTechniques["Record_SubItemIndex"] = Record_SubItemIndex;
                 row_MitreAttackTechniques["TechniqueDisplayName"] = TechniqueDisplayName;
@@ -8025,6 +8026,7 @@ endoffile
                 row_MitreAttackTechniques["yaml_File"] = yamlfile;
 
                 SearchTable.Rows.Add(row_MitreAttackTechniques);
+               
             }
             catch (Exception err)
             {
