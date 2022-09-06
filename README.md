@@ -3,8 +3,8 @@
  BasicEventViewer v4 in may 2022 Updated for ver (.NET 4.5) , Published by Damon Mohammadbagher.
 
  ```diff 
- + last source/exe update(6) v4.3.210.203 [Aug 24, 2022]... , 
- + in update6 bad bug for reloading events via dataGridView fixed , now reloading events is working very well without error/crash, i hope & Null Exception Error for Loading Events fixed too. 
+ + last source/exe update(7) new version [v4.3.247.298] [Sep 06, 2022]... , 
+ + in update7, bev4 new version [v4.3.247.298] you can update BEV Database for Real-time Scanner via two methods [1.via Simple text file , 2.via Atomic-Red-Team md file]
  ```
  
  BEV4 is Event Monitor tool (real-time & search) some simple things like Atomic-red-team yaml file added for test & Real time detection for some type of attack and ...
@@ -17,11 +17,26 @@ Usage Steps
     
 Note: in this code some yaml files (atomic-red-team yaml files) added to source code as "Database" for Search in Sysmon Event ID 1 Logs (real-time & search), so this code was for test and my database in this code is not good for detect everything but my tests was very good for some attack detection (real-time) , this code was for test and you can make your own code for real-time scanning Sysmon Events or ETW Events for Attack Detections based on Windows Events or ETW/Sysmon Events etc. you can load and watch my database in this tool and in this code All command prompts or powershell scripts will detect based on Yaml files information etc. (if you want use this database you really should change some rows in this DataBase, i did not change any thing in these yaml files , i just test them for some detection tests and results was good!).
 
-Video [new] for BEV4: https://www.linkedin.com/posts/damonmohammadbagher_bev4-and-updating-mitreattack-real-time-scanner-activity-6971754809817231360-nPFU
- 
-Video1 for BEV4: https://www.youtube.com/watch?v=imU82TApG2k
 
-Video2 for BEV4: https://www.youtube.com/watch?v=Hera3z1T5mI
+------------
+
+```diff
+!Note: in BEV4 new version [v4.3.247.298] you can update BEV Database for Real-time Scanner via two methods:
+```
+`1.via Simple text DB file (your own DB) `
+ 
+`2.via Atomic-Red-Team md file (which you can download from github repo: https://github.com/redcanaryco/atomic-red-team)`
+
+Videos for Updating BEV4 DB via two Methods: via simple text DB file and via Atomic-red-team md file ....
+
+Video [new version] for BEV4: https://www.youtube.com/watch?v=T1jYT_WcRZk
+
+Video [new version] for BEV4: https://www.linkedin.com/posts/damonmohammadbagher_bev4-and-updating-mitreattack-real-time-scanner-activity-6971754809817231360-nPFU
+ 
+-------------
+old Video1 for BEV4: https://www.youtube.com/watch?v=imU82TApG2k
+
+old Video2 for BEV4: https://www.youtube.com/watch?v=Hera3z1T5mI
 
 Important point: About Mitre Attack Detections This code [BEV4 (v4.0)] is/was my test codes (which i will publish here....) to use some Mitre Attacks Techniques (Using Atomic red-team) yaml files just for test & help to Blue teamers to learn these things better, BEV4 test is/was very good in my opinion but ofcourse i know this will not Detect every thing but this is very good example to start for Attack Detection based on Some Mitre Attack Data (using Sysmon EID 1 ONLY in my code) + yaml files & .... , you can see every Technique has steps (Procedures) which in my code BEV4 these steps or Procedures will detect by Sysmon EID 1 (commandLine) or ETW events (CommandLine) etc, in my code i created one simple "Techniques Database" which has all steps (Procedures) for each Technique (created base on yaml file for Atomic-Red-Team). that means in my DB i have technique A with 3 lines CommandLine and my code will Detected each commandline and scan them for detection for each Sysmon/ETW events, and make score for each detection but this is not enough for very good detection (which i learned this when i make this BEV4.0 ;D ) , because always you can bypass some detection very simple (sometimes), so if you think yaml file or Mitre Attack is enough always, you are wrong (i am sure 100% about this even before make this code) but Mitre Attack is very useful thing in my opinion and as i said before "Mitre Attack is/Can not Cover Everything...", anyway this code was fun also i learned alot from yaml files (atomic-red-team) + Mitre Attack things but i am sure this (my code) will not cover all things etc this just is for test.... also about Steps (Procedures) for Each Techniques you always can bypass detection, why? because always you can!
 
@@ -31,6 +46,9 @@ video link : https://youtu.be/MHfGIY2IyXE?t=414
 
 
 ----------------------------------------------------------
+###  BEV4 v4.3.247.298 [Sep 06, 2022].(in this new version you can update BEV Database for Real-time Scanner via two methods [1.via Simple text file , 2.via Atomic-Red-Team md file])
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/bev4.3_update.png)
+
 ###  BEV4 v4.3.200.138 [Jul 19, 2022].(BEV4 All Detection now saved into windows Eventlog Name [BEV4.3])
    ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_14.png)
 
