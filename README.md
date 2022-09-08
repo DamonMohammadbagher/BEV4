@@ -3,9 +3,10 @@
  BasicEventViewer v4 in may 2022 Updated for ver (.NET 4.5) , Published by Damon Mohammadbagher.
 
  ```diff 
- + last source/exe update(7) new version [v4.3.247.298] [Sep 06, 2022]... , 
- + in update7, BEV4 ver [v4.3.247.298] you can update BEV4 Database for MitreAttack Real-time Scanner via two methods:
+ + last source/exe update(8) new version [v4.3.251.308] [Sep 08, 2022]... , 
+ + in update8, BEV4 ver [v4.3.251.308] you can update BEV4 Database for MitreAttack Real-time Scanner via two methods:
  + DB Update method: 1.via Simple text file , 2.via Atomic-Red-Team md file
+ + also Real-time Filters Added to source code + Making Auto Simple_text_DB_File.txt file via (Atomic-Red-Team md file).
  ```
  
  BEV4 is Event Monitor tool (real-time & search) some simple things like Atomic-red-team yaml file added for test & Real time detection for some type of attack and ...
@@ -46,8 +47,8 @@ video link : https://youtu.be/MHfGIY2IyXE?t=414
 
 
 ----------------------------------------------------------
-###  BEV4 v4.3.247.298 [Sep 06, 2022].(in this new version you can update BEV Database for Real-time Scanner via two methods [1.via Simple text file , 2.via Atomic-Red-Team md file])
-   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/bev4.3_update.png)
+###  BEV4 v4.3.251.308 [Sep 08, 2022].(in this new version you can update BEV Database for Real-time Scanner via two methods [1.via Simple text file , 2.via Atomic-Red-Team md file])
+   ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/bev4.3_update8.png)
 
 ###  BEV4 v4.3.200.138 [Jul 19, 2022].(BEV4 All Detection now saved into windows Eventlog Name [BEV4.3])
    ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/BEV4_14.png)
