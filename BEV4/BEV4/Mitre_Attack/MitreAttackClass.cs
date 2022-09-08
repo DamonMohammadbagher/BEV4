@@ -721,7 +721,9 @@ namespace BEV4.Mitre_Attack
                     string dump = "";
                     int count = 0;
                     string temp = "";
+                    string SimpleTextDB_File = "";
 
+                   
                     using (StreamWriter sw = new StreamWriter("All_yaml_Files_Details.txt"))
                     {
                         int counter = 1;
@@ -775,16 +777,69 @@ namespace BEV4.Mitre_Attack
                     {
                         int counter = 1;
                         bool write = false;
+                        string lastitem = "";
+                        string lastcmd = "";
                         foreach (MitreAttack_Attack_Items item in commands)
                         {
                             if (item.CommandPrompt == "    command: |") write = true;
                             if (item.CommandPrompt.Contains("    cleanup_command: |") || item.CommandPrompt.Contains("    name: ")) write = false;
                             if (write)
+                            {
                                 sw.WriteLine(counter.ToString() + ": [" + item.Name + "] [" + item.Attack_technique_ID + "] [" + item.CommandPrompt + "]");
 
+                                /// attack_technique: Txxxx.xx1
+                                /// display_name: your name which you want!(cmd)
+                                /// simple_description: Simple Description for some Techniques/ Attacks Detected by You
+                                /// type: command_prompt
+                                /// commands: cmd.exe / c net user / domain
+                                /// commands: cmd.exe / c net users
+                                
+                                /// for test only these lines ;D (auto creating Simple_Text_DB_File.txt)
+                                /// in next version these lines will remove or change!....
+                                
+                                if (item.Attack_technique_ID != lastitem)
+                                {
+
+                                    SimpleTextDB_File += "\n\n" + item.Attack_technique_ID
+                                    + "\ndisplay_name: " + item.Name.Substring(8)
+                                    + "\nsimple_description:" + item.Name.Substring(7)
+                                    + "\ntype:" + item.CommandTypes;
+                                    if (item.CommandPrompt != "    command: |" && item.CommandPrompt != lastcmd
+                                    && !string.IsNullOrWhiteSpace(item.CommandPrompt) && !item.CommandPrompt.EndsWith("   }"))
+                                    {
+                                        SimpleTextDB_File += "\ncommands:" + item.CommandPrompt.Substring(5);
+                                        lastcmd = item.CommandPrompt;
+                                    }
+                                }
+                                else
+                                {
+                                    if (item.CommandPrompt != "    command: |" && item.CommandPrompt != lastcmd
+                                     && !string.IsNullOrWhiteSpace(item.CommandPrompt) && !item.CommandPrompt.EndsWith("   }"))
+                                    {
+                                        SimpleTextDB_File += "\ncommands:" + item.CommandPrompt.Substring(5);
+                                        lastcmd = item.CommandPrompt;
+                                    }
+                                }
+                                
+                                lastitem = item.Attack_technique_ID;
+
+                                /// for test only these lines ;D  (auto creating Simple_Text_DB_File.txt)
+                                /// in next version these lines will remove or change!....
+                            }
                             counter++;
                         }
+
                         sw.Close();
+
+                        if (Form1._Setup_Auto_Simple_text_DB_File)
+                        {
+                            using (StreamWriter sw2 = new StreamWriter("Simple_text_DB_File.txt"))
+                            {
+                                sw2.WriteLine(SimpleTextDB_File);
+                                sw2.Close();
+                            }
+                        }
+                        
 
                     }
                     try
