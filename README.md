@@ -47,7 +47,7 @@ video link : https://youtu.be/MHfGIY2IyXE?t=414
 
 
 ----------------------------------------------------------
-###  BEV4 v4.3.251.308 [Sep 08, 2022].(in this new version you can update BEV Database for Real-time Scanner via two methods [1.via Simple text file , 2.via Atomic-Red-Team md file])
+###  BEV4 v4.3.251.308 [Sep 08, 2022].(in this new version you can update BEV Database for Real-time Scanner via two methods [1.via Simple text file , 2.via Atomic-Red-Team md file] also Real-time Filters Added to source code + Making Auto Simple_text_DB_File.txt file via [Atomic-Red-Team md file])
    ![](https://github.com/DamonMohammadbagher/BEV4/blob/main/Pics/bev4.3_update8.png)
 
 ###  BEV4 v4.3.200.138 [Jul 19, 2022].(BEV4 All Detection now saved into windows Eventlog Name [BEV4.3])
