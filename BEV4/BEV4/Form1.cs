@@ -80,7 +80,13 @@ namespace BEV4
         public static bool _Is_DB_Records_Updated = false;
         public static string _DB_CurrentVersion = "DB Update ver: " + "(windows-index.md 22/07/2022)";
         public static string _DB_CurrentVersion_FilePath = "BEV4 source code , (Default Database)";
-        
+        public static Task _DBUpdateTask;
+        public static bool _IsFilter_TruePositiveOnly = false;
+        public static bool _IsFilter_FalsePositiveOnly = false;
+        public static bool _IsFilter_AllDetections = true;
+        public static bool _Setup_Auto_Simple_text_DB_File = false;
+
+
         public void Refresh_Remote_TreeNodes()
         {
             try
@@ -1074,11 +1080,13 @@ namespace BEV4
 
                                         try
                                         {
-                                            toolStripStatusLabel10.BackColor = Color.DarkGray;                                          
-
-                                            if (IsSummary/* && !IsSummary_Details && !t4.Enabled*/)
-                                                toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
-                                                + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                            toolStripStatusLabel10.BackColor = Color.DarkGray;
+                                            BeginInvoke((MethodInvoker)delegate
+                                            {
+                                                if (IsSummary/* && !IsSummary_Details && !t4.Enabled*/)
+                                                    toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                                    + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                            });
                                         }
                                         catch (Exception)
                                         {
@@ -1093,8 +1101,13 @@ namespace BEV4
 
                                             if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
                                             {
-                                                listView2.Items.Add((ListViewItem)iList2.Clone());
-                                                Thread.Sleep(10);
+                                                if (_IsFilter_TruePositiveOnly || _IsFilter_AllDetections)
+                                                {
+                                                    listView2.Items.Add((ListViewItem)iList2.Clone());
+                                                    Thread.Sleep(10);
+                                                    /// create event id 2 in BEV4.3 EventLog
+                                                    RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object)iList2);
+                                                }
                                             }
 
                                             SortedList4_HSTruePositives.Add(iList2);
@@ -1103,18 +1116,19 @@ namespace BEV4
                                             try
                                             {
                                                 toolStripStatusLabel10.BackColor = Color.DarkGray;
-
-                                                if (IsSummary/* && !IsSummary_Details && !t4.Enabled*/)
-                                                    toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
-                                                    + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                                BeginInvoke((MethodInvoker)delegate
+                                                {
+                                                    if (IsSummary/* && !IsSummary_Details && !t4.Enabled*/)
+                                                        toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                                        + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                                });
                                             }
                                             catch (Exception)
                                             {
 
                                             }
 
-                                            /// create event id 2 in BEV4.3 EventLog
-                                            RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object)iList2);
+                                          
                                         }
                                         else 
                                         if (a < b || (Convert.ToDouble(items.ProcessItemsDetectedCount_Score.Split('/')[1]) == 2 && b >= 1.5))
@@ -1139,13 +1153,17 @@ namespace BEV4
 
                                             if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
                                             {
-                                                listView2.Items.Add((ListViewItem)iList2.Clone());
-                                                Thread.Sleep(10);
+                                                if (_IsFilter_TruePositiveOnly || _IsFilter_AllDetections)
+                                                {
+                                                    listView2.Items.Add((ListViewItem)iList2.Clone());
+                                                    Thread.Sleep(10);
+                                                    /// create event id 2 in BEV4.3 EventLog
+                                                    RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object)iList2);
+                                                }
                                             }
 
                                             SortedList3_HighScore.Add(iList2);
-                                            /// create event id 2 in BEV4.3 EventLog
-                                            RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog((object)iList2);
+                                           
 
                                         }
                                         else
@@ -1154,10 +1172,12 @@ namespace BEV4
                                             try
                                             {
                                                 toolStripStatusLabel10.BackColor = Color.DarkGray;
-
-                                                if (IsSummary/* && !IsSummary_Details && !t4.Enabled*/)
-                                                    toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
-                                                    + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                                BeginInvoke((MethodInvoker)delegate
+                                                {
+                                                    if (IsSummary/* && !IsSummary_Details && !t4.Enabled*/)
+                                                        toolStripStatusLabel10.Text = "Detection Summary: FullScore Detected: [" + SortedList4_HSTruePositives.Count.ToString()
+                                                        + "] , HighScore Detected: [" + SortedList3_HighScore.Count.ToString() + "]";
+                                                });
                                             }
                                             catch (Exception)
                                             {
@@ -1169,10 +1189,14 @@ namespace BEV4
 
                                             if (iList2.SubItems[3].Text + "@" + iList2.SubItems[4].Text != tmp)
                                             {
-                                                listView2.Items.Add((ListViewItem)iList2.Clone());
-                                                Thread.Sleep(10);
+                                                if (_IsFilter_FalsePositiveOnly || _IsFilter_AllDetections)
+                                                {
+                                                    listView2.Items.Add((ListViewItem)iList2.Clone());
+                                                    Thread.Sleep(10);
+                                                    RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog2((object)iList2);
+                                                }
                                                 /// create event id 3 in BEV4.3 EventLog
-                                                RealTime.RealtimeEventIDsMonitor._RunAsync_Save_New_DetectionLogs_Events_to_WinEventLog2((object)iList2);
+                                                
 
                                             }
                                         }
@@ -2995,6 +3019,7 @@ namespace BEV4
                 ofd2.RestoreDirectory = true;
                 string _dir = ofd2.InitialDirectory;
                 string dump;
+                _Setup_Auto_Simple_text_DB_File = false;
 
                 using (StreamReader sw = new StreamReader(targetfile2))
                 {
@@ -3065,6 +3090,99 @@ namespace BEV4
             catch (Exception eee)
             {
 
+                MessageBox.Show(eee.Message);
+            }
+        }
+
+
+        private async void LoadAllCmdPromptsMakeSimpleTextDBFiletxtviaAtomicRedTeamWindowsIndexmdFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+
+                List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items> AllMitreAttackIndeXEDtechniqueIds
+                    = new List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>();
+
+                OpenFileDialog ofd2 = new OpenFileDialog();
+
+                ofd2.Filter = "md files (windows-index.md)|windows-index.md";
+                ofd2.FilterIndex = 0;
+                ofd2.ShowDialog();
+                string targetfile2 = ofd2.FileName;
+                ofd2.RestoreDirectory = true;
+                string _dir = ofd2.InitialDirectory;
+                string dump;
+                _Setup_Auto_Simple_text_DB_File = true;
+
+                using (StreamReader sw = new StreamReader(targetfile2))
+                {
+                    dump = sw.ReadToEnd();
+                    sw.Close();
+                }
+
+                string[] listAll = dump.Split('\n');
+                int[] indexAll = Mitre_Attack.MitreAttackClass._FindAllIndex("- [T", dump, 0);
+                string filename = "";
+                string[] PATH = targetfile2.Split('\\');
+                int INDEXPATH = PATH.Length - 2;
+                string finalpath = "";
+
+                for (int i = 0; i <= INDEXPATH; i++)
+                {
+                    finalpath += PATH[i] + "\\";
+                }
+
+                foreach (string item in listAll)
+                {
+                    try
+                    {
+                        if (item.StartsWith("- [T"))
+                        {
+                            /// ting](../../T1558.004/T1558.004.md)
+                            //filename = item.Split('(')[1].Split(')')[0];
+                            filename = item.Split(']')[1].Split('(')[1].Split(')')[0];
+                            filename = filename.Substring(0, filename.Length - 2);
+                            filename = filename + "yaml";
+
+                            if (!filename.StartsWith("https://"))
+                                mitre.DumpYamlInfo(finalpath + filename);
+
+                            foreach (Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items xitem in Mitre_Attack.MitreAttackClass.MitreAttackList_Array_Copy)
+                            {
+                                if (xitem.CommandTypes.Contains("command_prompt") || xitem.CommandTypes.Contains("powershell"))
+                                    AllMitreAttackIndeXEDtechniqueIds.Add(xitem);
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+
+
+                    }
+                }
+
+                richTextBox1.Text = "";
+                IsFilteringMode_Mittre_EID1 = true;
+
+                Task _SearchTask = Mitre_Attack.MitreAttackClass.UpdateDB_and_MakeSimpleTextFile_AllCommandPrompts(false, AllMitreAttackIndeXEDtechniqueIds
+                   .ToList<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>().ToArray<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>());
+                await _SearchTask.ConfigureAwait(true);
+
+                do
+                {
+                    Thread.Sleep(10);
+                    if (_SearchTask.IsCompleted)
+                    {
+                        break;
+                    }
+
+                } while (!_SearchTask.IsCompleted);
+
+                _Setup_Auto_Simple_text_DB_File = false;
+            }
+            catch (Exception eee)
+            {
+                _Setup_Auto_Simple_text_DB_File = false;
                 MessageBox.Show(eee.Message);
             }
         }
@@ -3487,163 +3605,155 @@ namespace BEV4
             }
         }
 
-        private async void UpdateDatabaseviaYourOwnYamlFileToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void RunAsync_UpdateDB_viaSimpletextDBfile(string dump, string FileName, string SafeFileName, string FI_lastwrite)
         {
-            try
+            await RunAsync_UpdateDB_viaSimpletextDBfile_core(dump,  FileName,  SafeFileName,  FI_lastwrite);
+        }
+        private async Task RunAsync_UpdateDB_viaSimpletextDBfile_core(string dump,string FileName, string SafeFileName, string FI_lastwrite)
+        {
+            await Task.Run(() =>
             {
-
-                List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items> _YourOwnDB_TechniqueIDs
-                       = new List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>();
-
-                OpenFileDialog ofd2 = new OpenFileDialog();
-
-                ofd2.Filter = "text files (MyDataBase.txt)|*.txt";
-                ofd2.FilterIndex = 0;
-                ofd2.ShowDialog();
-                string targetfile2 = ofd2.FileName;
-                ofd2.RestoreDirectory = true;
-                string _dir = ofd2.InitialDirectory;
-                string dump;
-
-                /// checking md file last update/modify date
-                FileInfo Finfo = new FileInfo(targetfile2);
-                string FI_lastwrite = Finfo.LastWriteTime.ToString();
-                groupBox25.BeginInvoke((MethodInvoker)delegate
-                { groupBox25.Text = "Your own DB, (Last Updated: " + ofd2.SafeFileName + " " + FI_lastwrite + ")"; });
-
-                using (StreamReader sw = new StreamReader(targetfile2))
+                try
                 {
-                    dump = sw.ReadToEnd();
-                    sw.Close();
-                }
+                    List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items> _YourOwnDB_TechniqueIDs
+                       = new List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>();                 
 
-                string[] listAll_Techniques = dump.Split('\n');
-                int[] indexAll = Mitre_Attack.MitreAttackClass._FindAllIndex("attack_technique:", dump, 0);
-                int ItemIndex = 0;
-                //attack_technique: Txxxx.xx1
-                //display_name: your name which you want! (cmd)
-                //simple_description: Simple Description for some attacks detected by You
-                //type: command_prompt
-                //cmdlines: 2
-                //commands: cmd.exe /c net user /domain
-                //commands: cmd.exe /c net user
-                string tmp = "";
-                string TechId = "";
-                string DispName = "";
-                string SimpleDes = "";
-                string type = "";
-                string cmds = "";
-                foreach (string item in listAll_Techniques)
-                {
-                    try
+                    string[] listAll_Techniques = dump.Split('\n');
+                    int[] indexAll = Mitre_Attack.MitreAttackClass._FindAllIndex("attack_technique:", dump, 0);
+                    int ItemIndex = 0;
+                    //attack_technique: Txxxx.xx1
+                    //display_name: your name which you want! (cmd)
+                    //simple_description: Simple Description for some attacks detected by You
+                    //type: command_prompt
+                    //cmdlines: 2
+                    //commands: cmd.exe /c net user /domain
+                    //commands: cmd.exe /c net user
+                    string tmp = "";
+                    string TechId = "";
+                    string DispName = "";
+                    string SimpleDes = "";
+                    string type = "";
+                    string cmds = "";
+                    foreach (string item in listAll_Techniques)
                     {
-                        if (item.ToLower().StartsWith("attack_technique:") && item.ToLower() != tmp)
+                        try
                         {
-                            TechId = listAll_Techniques[ItemIndex];
-                            if (listAll_Techniques[ItemIndex + 1].ToLower().StartsWith("display_name:"))
-                                DispName = listAll_Techniques[ItemIndex + 1].Substring(13);
-                            if (listAll_Techniques[ItemIndex + 2].ToLower().StartsWith("simple_description:"))
-                                SimpleDes = listAll_Techniques[ItemIndex + 2].Substring(19);
-                            if (listAll_Techniques[ItemIndex + 3].ToLower().StartsWith("type:"))
-                                type = listAll_Techniques[ItemIndex + 3].Substring(5);
-                            if (listAll_Techniques[ItemIndex + 4].ToLower().StartsWith("commands:"))
-                                cmds = listAll_Techniques[ItemIndex + 4].Substring(9);
-                            int cmdlines = ItemIndex + 4;
-                            bool init = true;
-                            do
+                            Task.Delay(2);
+                            if (item.ToLower().StartsWith("attack_technique:") && item.ToLower() != tmp)
                             {
-                                cmdlines++;
-
-                                if (init)
-                                    _YourOwnDB_TechniqueIDs.Add(new Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items
-                                    {
-                                        Attack_technique_ID = TechId.Replace('\n', ' ').Replace('\r', ' '),
-                                        Name = "       " + DispName.Replace('\n', ' ').Replace('\r', ' '),
-                                        Description = SimpleDes.Replace('\n', ' ').Replace('\r', ' '),
-                                        CommandTypes = type.Replace('\n', ' ').Replace('\r', ' '),
-                                        CommandPrompt = "     " + cmds
-                                    });
-
-                                /// because of these codes line(455) in RealtimeEventIDsMonitor.cs
-                                /// 455:    if (Form1._Is_DB_Updated)
-                                ///         FullScore_counts2 = attack_technique_Commands_sub_Items.Length - 5;
-                                ///         else if (!Form1._Is_DB_Updated)
-                                ///         FullScore_counts2 = attack_technique_Commands_sub_Items.Length - 6;
-                                ///         
-                                ///  you need 5 whitespaces for DB Updates via text files (which made by users)
-                                ///
-                                /// CommandPrompt = "     " + cmds
-                                /// CommandPrompt = "     " + listAll_Techniques[cmdlines].Substring(9)
-
-                                init = false;
-
-                                if (listAll_Techniques[cmdlines].ToLower().StartsWith("commands:"))
+                                TechId = listAll_Techniques[ItemIndex];
+                                if (listAll_Techniques[ItemIndex + 1].ToLower().StartsWith("display_name:"))
+                                    DispName = listAll_Techniques[ItemIndex + 1].Substring(13);
+                                if (listAll_Techniques[ItemIndex + 2].ToLower().StartsWith("simple_description:"))
+                                    SimpleDes = listAll_Techniques[ItemIndex + 2].Substring(19);
+                                if (listAll_Techniques[ItemIndex + 3].ToLower().StartsWith("type:"))
+                                    type = listAll_Techniques[ItemIndex + 3].Substring(5);
+                                if (listAll_Techniques[ItemIndex + 4].ToLower().StartsWith("commands:"))
+                                    cmds = listAll_Techniques[ItemIndex + 4].Substring(9);
+                                int cmdlines = ItemIndex + 4;
+                                bool init = true;
+                                do
                                 {
-                                    _YourOwnDB_TechniqueIDs.Add(new Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items
+                                    cmdlines++;
+
+                                    if (init)
+                                        _YourOwnDB_TechniqueIDs.Add(new Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items
+                                        {
+                                            Attack_technique_ID = TechId.Replace('\n', ' ').Replace('\r', ' '),
+                                            Name = "       " + DispName.Replace('\n', ' ').Replace('\r', ' '),
+                                            Description = SimpleDes.Replace('\n', ' ').Replace('\r', ' '),
+                                            CommandTypes = type.Replace('\n', ' ').Replace('\r', ' '),
+                                            CommandPrompt = "     " + cmds
+                                        });
+
+                                    /// because of these codes line(455) in RealtimeEventIDsMonitor.cs
+                                    /// 455:    if (Form1._Is_DB_Updated)
+                                    ///         FullScore_counts2 = attack_technique_Commands_sub_Items.Length - 5;
+                                    ///         else if (!Form1._Is_DB_Updated)
+                                    ///         FullScore_counts2 = attack_technique_Commands_sub_Items.Length - 6;
+                                    ///         
+                                    ///  you need 5 whitespaces for DB Updates via text files (which made by users)
+                                    ///
+                                    /// CommandPrompt = "     " + cmds
+                                    /// CommandPrompt = "     " + listAll_Techniques[cmdlines].Substring(9)
+
+                                    init = false;
+
+                                    if (listAll_Techniques[cmdlines].ToLower().StartsWith("commands:"))
                                     {
-                                        Attack_technique_ID = TechId.Replace('\n', ' ').Replace('\r', ' '),
-                                        Name = "       " + DispName.Replace('\n', ' ').Replace('\r', ' '),
-                                        Description = SimpleDes.Replace('\n', ' ').Replace('\r', ' '),
-                                        CommandTypes = type.Replace('\n', ' ').Replace('\r', ' '),
-                                        CommandPrompt = "     " + listAll_Techniques[cmdlines].Substring(9)
-                                    });
-                                }
-                                else break;
+                                        _YourOwnDB_TechniqueIDs.Add(new Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items
+                                        {
+                                            Attack_technique_ID = TechId.Replace('\n', ' ').Replace('\r', ' '),
+                                            Name = "       " + DispName.Replace('\n', ' ').Replace('\r', ' '),
+                                            Description = SimpleDes.Replace('\n', ' ').Replace('\r', ' '),
+                                            CommandTypes = type.Replace('\n', ' ').Replace('\r', ' '),
+                                            CommandPrompt = "     " + listAll_Techniques[cmdlines].Substring(9)
+                                        });
+                                    }
+                                    else break;
 
-                                Thread.Sleep(50);
 
-                            } while (true);
 
-                            tmp = item.ToLower();
+                                } while (true);
+
+                                tmp = item.ToLower();
+
+                            }
+
+                            ItemIndex++;
+                        }
+                        catch (Exception)
+                        {
+
 
                         }
-
-                        ItemIndex++;
                     }
-                    catch (Exception)
-                    {
 
+                    _Is_DB_Records_Updated = true;
+                    Thread.Sleep(2000);
+                    Master_Value.MasterValueClass.table_MitreAttackTechniques.Clear();
+                    Thread.Sleep(2000);
 
-                    }
-                }
-
-                _Is_DB_Records_Updated = true;
-                Thread.Sleep(2000);
-                Master_Value.MasterValueClass.table_MitreAttackTechniques.Clear();
-                Thread.Sleep(2000);
-
-                Task _DBUpdateTask = Mitre_Attack.MitreAttackClass.UpdateDB_via_SimpleTextFile(true, _YourOwnDB_TechniqueIDs
+                    
+                    _DBUpdateTask = Mitre_Attack.MitreAttackClass.UpdateDB_via_SimpleTextFile(true, _YourOwnDB_TechniqueIDs
                    .ToList<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>().ToArray<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>());
-                await _DBUpdateTask.ConfigureAwait(true);
+                    _DBUpdateTask.GetAwaiter();
 
-                do
-                {
-                    Thread.Sleep(50);
-                    if (_DBUpdateTask.IsCompleted)
+                 
+                    do
                     {
-                        break;
-                    }
+                        Thread.Sleep(50);
+                        if (_DBUpdateTask.IsCompleted)
+                        {
+                            break;
+                        }
 
-                } while (!_DBUpdateTask.IsCompleted);
+                    } while (!_DBUpdateTask.IsCompleted);
 
-                dataGridView7.DataSource = Master_Value.MasterValueClass.table_MitreAttackTechniques;
-                _Is_DB_Updated = true;
-                if (_Is_DB_Updated)
-                {
-                    await Task.Run(() =>
+                    dataGridView7.DataSource = Master_Value.MasterValueClass.table_MitreAttackTechniques;
+                    _Is_DB_Updated = true;
+
+                    if (_Is_DB_Updated)
                     {
-                        _DB_CurrentVersion = "DB Update ver: " + "(" + ofd2.SafeFileName + " " + FI_lastwrite + ")";
-                        _DB_CurrentVersion_FilePath = ofd2.FileName.ToLower();
+                       
+                        _DB_CurrentVersion = "DB Update ver: " + "(" + SafeFileName + " " + FI_lastwrite + ")";
+                        _DB_CurrentVersion_FilePath = FileName.ToLower();
                         string Logs = "Real-time DB updated via your own text file: "
-                            + "(Last Updated: " + ofd2.SafeFileName + " " + FI_lastwrite + ")"
+                            + "(Last Updated: " + SafeFileName + " " + FI_lastwrite + ")"
                             + ", Mitre Attack Real-time (Database Updated!)";
+
                         richTextBox37.BeginInvoke((MethodInvoker)delegate
                         {
                             richTextBox37.Text += "Time: " + DateTime.Now.ToString() + " => " + Logs + "\n";
                         });
 
+                        groupBox25.BeginInvoke((MethodInvoker)delegate
+                        {
+                            groupBox25.Text = "Your own DB, (Last Updated: " + SafeFileName + " " + FI_lastwrite + ")";
+                        });
+
                         MessageBox.Show("Real-time DB updated via your own text file:\n"
-                            + "(Last Updated: " + ofd2.SafeFileName + " " + FI_lastwrite + ")"
+                            + "(Last Updated: " + SafeFileName + " " + FI_lastwrite + ")"
                             , "Mitre Attack Real-time (Database Updated!)");
 
                         try
@@ -3659,16 +3769,54 @@ namespace BEV4
                             BEV4 = new EventLog("BEV4.3", ".", "BEV_4");
                             BEV4.WriteEntry("BEV4 MitreAttack Real-time DB Updated (Method2, update via simple text DB file): \n"
                                 + _DB_CurrentVersion
-                                + "\nDB File Path => " + ofd2.FileName.ToLower(), EventLogEntryType.Information, 254);
+                                + "\nDB File Path => " + FileName.ToLower(), EventLogEntryType.Information, 254);
                         }
                         catch (Exception ee)
                         {
 
                         }
-                    });
+                        
+                    }
+                    _Is_DB_Records_Updated = false;
+
                 }
-                _Is_DB_Records_Updated = false;
-                
+                catch (Exception eee)
+                {
+
+                    _Is_DB_Updated = false;
+                    MessageBox.Show(eee.Message);
+                }
+            });
+        }
+        private async void UpdateDatabaseviaYourOwnYamlFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            try
+            {
+                OpenFileDialog ofd2 = new OpenFileDialog();
+
+                ofd2.Filter = "text files (MyDataBase.txt)|*.txt";
+                ofd2.FilterIndex = 0;
+                ofd2.ShowDialog();
+                string targetfile2 = ofd2.FileName;
+                ofd2.RestoreDirectory = true;
+                string _dir = ofd2.InitialDirectory;
+                string dump;
+
+                /// checking md file last update/modify date
+                FileInfo Finfo = new FileInfo(targetfile2);
+                string FI_lastwrite = Finfo.LastWriteTime.ToString();
+
+
+                using (StreamReader sw = new StreamReader(targetfile2))
+                {
+                    dump = sw.ReadToEnd();
+                    sw.Close();
+                }
+
+                MessageBox.Show("Press OK to Start!\nthis will take minutes please wait....", "Note:");
+
+                BeginInvoke((MethodInvoker)delegate { RunAsync_UpdateDB_viaSimpletextDBfile(dump, ofd2.FileName, ofd2.SafeFileName, FI_lastwrite); });
             }
             catch (Exception eee)
             {
@@ -3676,6 +3824,249 @@ namespace BEV4
                 _Is_DB_Updated = false;
                 MessageBox.Show(eee.Message);
             }
+
+            //await Task.Run(() =>
+            //{
+            //    try
+            //    {
+            //        string dump;
+
+            //        Invoke((MethodInvoker)delegate
+            //        {
+            //            List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items> _YourOwnDB_TechniqueIDs
+            //               = new List<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>();
+
+            //            OpenFileDialog ofd2 = new OpenFileDialog();
+
+            //            ofd2.Filter = "text files (MyDataBase.txt)|*.txt";
+            //            ofd2.FilterIndex = 0;
+            //            ofd2.ShowDialog();
+            //            string targetfile2 = ofd2.FileName;
+            //            ofd2.RestoreDirectory = true;
+            //            string _dir = ofd2.InitialDirectory;
+
+
+            //            /// checking md file last update/modify date
+            //            FileInfo Finfo = new FileInfo(targetfile2);
+            //            string FI_lastwrite = Finfo.LastWriteTime.ToString();
+            //            groupBox25.BeginInvoke((MethodInvoker)delegate
+            //            { groupBox25.Text = "Your own DB, (Last Updated: " + ofd2.SafeFileName + " " + FI_lastwrite + ")"; });
+
+            //            using (StreamReader sw = new StreamReader(targetfile2))
+            //            {
+            //                dump = sw.ReadToEnd();
+            //                sw.Close();
+            //            }
+
+            //            MessageBox.Show("this will take minutes plase wait.... ,PLease Press OK to Start!", "Note:");
+            //            string[] listAll_Techniques = dump.Split('\n');
+            //            int[] indexAll = Mitre_Attack.MitreAttackClass._FindAllIndex("attack_technique:", dump, 0);
+            //            int ItemIndex = 0;
+            //            //attack_technique: Txxxx.xx1
+            //            //display_name: your name which you want! (cmd)
+            //            //simple_description: Simple Description for some attacks detected by You
+            //            //type: command_prompt
+            //            //cmdlines: 2
+            //            //commands: cmd.exe /c net user /domain
+            //            //commands: cmd.exe /c net user
+            //            string tmp = "";
+            //            string TechId = "";
+            //            string DispName = "";
+            //            string SimpleDes = "";
+            //            string type = "";
+            //            string cmds = "";
+            //            foreach (string item in listAll_Techniques)
+            //            {
+            //                try
+            //                {
+            //                    if (item.ToLower().StartsWith("attack_technique:") && item.ToLower() != tmp)
+            //                    {
+            //                        TechId = listAll_Techniques[ItemIndex];
+            //                        if (listAll_Techniques[ItemIndex + 1].ToLower().StartsWith("display_name:"))
+            //                            DispName = listAll_Techniques[ItemIndex + 1].Substring(13);
+            //                        if (listAll_Techniques[ItemIndex + 2].ToLower().StartsWith("simple_description:"))
+            //                            SimpleDes = listAll_Techniques[ItemIndex + 2].Substring(19);
+            //                        if (listAll_Techniques[ItemIndex + 3].ToLower().StartsWith("type:"))
+            //                            type = listAll_Techniques[ItemIndex + 3].Substring(5);
+            //                        if (listAll_Techniques[ItemIndex + 4].ToLower().StartsWith("commands:"))
+            //                            cmds = listAll_Techniques[ItemIndex + 4].Substring(9);
+            //                        int cmdlines = ItemIndex + 4;
+            //                        bool init = true;
+            //                        do
+            //                        {
+            //                            cmdlines++;
+
+            //                            if (init)
+            //                                _YourOwnDB_TechniqueIDs.Add(new Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items
+            //                                {
+            //                                    Attack_technique_ID = TechId.Replace('\n', ' ').Replace('\r', ' '),
+            //                                    Name = "       " + DispName.Replace('\n', ' ').Replace('\r', ' '),
+            //                                    Description = SimpleDes.Replace('\n', ' ').Replace('\r', ' '),
+            //                                    CommandTypes = type.Replace('\n', ' ').Replace('\r', ' '),
+            //                                    CommandPrompt = "     " + cmds
+            //                                });
+
+            //                            /// because of these codes line(455) in RealtimeEventIDsMonitor.cs
+            //                            /// 455:    if (Form1._Is_DB_Updated)
+            //                            ///         FullScore_counts2 = attack_technique_Commands_sub_Items.Length - 5;
+            //                            ///         else if (!Form1._Is_DB_Updated)
+            //                            ///         FullScore_counts2 = attack_technique_Commands_sub_Items.Length - 6;
+            //                            ///         
+            //                            ///  you need 5 whitespaces for DB Updates via text files (which made by users)
+            //                            ///
+            //                            /// CommandPrompt = "     " + cmds
+            //                            /// CommandPrompt = "     " + listAll_Techniques[cmdlines].Substring(9)
+
+            //                            init = false;
+
+            //                            if (listAll_Techniques[cmdlines].ToLower().StartsWith("commands:"))
+            //                            {
+            //                                _YourOwnDB_TechniqueIDs.Add(new Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items
+            //                                {
+            //                                    Attack_technique_ID = TechId.Replace('\n', ' ').Replace('\r', ' '),
+            //                                    Name = "       " + DispName.Replace('\n', ' ').Replace('\r', ' '),
+            //                                    Description = SimpleDes.Replace('\n', ' ').Replace('\r', ' '),
+            //                                    CommandTypes = type.Replace('\n', ' ').Replace('\r', ' '),
+            //                                    CommandPrompt = "     " + listAll_Techniques[cmdlines].Substring(9)
+            //                                });
+            //                            }
+            //                            else break;
+
+            //                            Thread.Sleep(50);
+
+            //                        } while (true);
+
+            //                        tmp = item.ToLower();
+
+            //                    }
+
+            //                    ItemIndex++;
+            //                }
+            //                catch (Exception)
+            //                {
+
+
+            //                }
+            //            }
+
+            //            _Is_DB_Records_Updated = true;
+            //            Thread.Sleep(2000);
+            //            Master_Value.MasterValueClass.table_MitreAttackTechniques.Clear();
+            //            Thread.Sleep(2000);
+
+            //            //await Task.Run(() =>
+            //            //{
+
+
+            //            _DBUpdateTask = Mitre_Attack.MitreAttackClass.UpdateDB_via_SimpleTextFile(true, _YourOwnDB_TechniqueIDs
+            //           .ToList<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>().ToArray<Mitre_Attack.MitreAttackClass.MitreAttack_Attack_Items>());
+            //            _DBUpdateTask.GetAwaiter();
+
+            //            //});
+
+            //            do
+            //            {
+            //                Thread.Sleep(50);
+            //                if (_DBUpdateTask.IsCompleted)
+            //                {
+            //                    break;
+            //                }
+
+            //            } while (!_DBUpdateTask.IsCompleted);
+
+            //            dataGridView7.DataSource = Master_Value.MasterValueClass.table_MitreAttackTechniques;
+            //            _Is_DB_Updated = true;
+
+            //            if (_Is_DB_Updated)
+            //            {
+            //                //await Task.Run(() =>
+            //                //{
+            //                _DB_CurrentVersion = "DB Update ver: " + "(" + ofd2.SafeFileName + " " + FI_lastwrite + ")";
+            //                _DB_CurrentVersion_FilePath = ofd2.FileName.ToLower();
+            //                string Logs = "Real-time DB updated via your own text file: "
+            //                    + "(Last Updated: " + ofd2.SafeFileName + " " + FI_lastwrite + ")"
+            //                    + ", Mitre Attack Real-time (Database Updated!)";
+            //                richTextBox37.BeginInvoke((MethodInvoker)delegate
+            //                {
+            //                    richTextBox37.Text += "Time: " + DateTime.Now.ToString() + " => " + Logs + "\n";
+            //                });
+
+            //                MessageBox.Show("Real-time DB updated via your own text file:\n"
+            //                    + "(Last Updated: " + ofd2.SafeFileName + " " + FI_lastwrite + ")"
+            //                    , "Mitre Attack Real-time (Database Updated!)");
+
+            //                try
+            //                {
+
+            //                    if (!EventLog.Exists("BEV4.3"))
+            //                    {
+            //                        EventSourceCreationData ESCD = new EventSourceCreationData("BEV_4", "BEV4.3");
+            //                        System.Diagnostics.EventLog.CreateEventSource(ESCD);
+
+            //                    }
+
+            //                    BEV4 = new EventLog("BEV4.3", ".", "BEV_4");
+            //                    BEV4.WriteEntry("BEV4 MitreAttack Real-time DB Updated (Method2, update via simple text DB file): \n"
+            //                        + _DB_CurrentVersion
+            //                        + "\nDB File Path => " + ofd2.FileName.ToLower(), EventLogEntryType.Information, 254);
+            //                }
+            //                catch (Exception ee)
+            //                {
+
+            //                }
+            //                //});
+            //            }
+            //            _Is_DB_Records_Updated = false;
+            //        });
+            //    }
+            //    catch (Exception eee)
+            //    {
+
+            //        _Is_DB_Updated = false;
+            //        MessageBox.Show(eee.Message);
+            //    }
+            //});
+
         }
+
+            private void ShowLogsAllDetectionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _IsFilter_AllDetections = true;
+            _IsFilter_FalsePositiveOnly = false;
+            _IsFilter_TruePositiveOnly = false;
+            toolStripStatusLabel6.ForeColor = Color.White;
+            toolStripStatusLabel6.BackColor = Color.Gray;
+            toolStripStatusLabel6.Text = " Real-time Filters: Shows/logs All Detections (Default)";
+            showLogsAllDetectionsToolStripMenuItem.Checked = true;
+            showsLogsOnlyFalsePositiveDetectionsToolStripMenuItem.Checked = false;
+            logsOnlyTruePositivesNotRecommandedToolStripMenuItem.Checked = false;
+        }
+
+        private void ShowsLogsOnlyFalsePositiveDetectionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _IsFilter_AllDetections = false;
+            _IsFilter_FalsePositiveOnly = true;
+            _IsFilter_TruePositiveOnly = false;
+            toolStripStatusLabel6.ForeColor = Color.Red;
+            toolStripStatusLabel6.BackColor = Color.LightGray;
+            toolStripStatusLabel6.Text = " Real-time Filters: Shows/logs only False Positives Detections";
+            showLogsAllDetectionsToolStripMenuItem.Checked = false;
+            showsLogsOnlyFalsePositiveDetectionsToolStripMenuItem.Checked = true;
+            logsOnlyTruePositivesNotRecommandedToolStripMenuItem.Checked = false;
+        }
+
+        private void LogsOnlyTruePositivesNotRecommandedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _IsFilter_AllDetections = false;
+            _IsFilter_FalsePositiveOnly = false;
+            _IsFilter_TruePositiveOnly = true;
+            toolStripStatusLabel6.ForeColor = Color.Red;
+            toolStripStatusLabel6.BackColor = Color.LightGray;
+            toolStripStatusLabel6.Text = " Real-time Filters: Shows/logs only True Positives Detections (Not Recommended)";
+            showLogsAllDetectionsToolStripMenuItem.Checked = false;
+            showsLogsOnlyFalsePositiveDetectionsToolStripMenuItem.Checked = false;
+            logsOnlyTruePositivesNotRecommandedToolStripMenuItem.Checked = true;
+        }
+
     }
 }
