@@ -502,6 +502,7 @@ namespace BEV4.RealTime
 
                                                     /// count is high if detected something like args in comandline ;) not bad code i hope ;)
 
+
                                                     Processes_Sysmon_CommandLines_sub_Items = Args_Listitem._CommandLine.Substring(1).Split(' ');
                                                     string[] _ImageStr = Args_Listitem._Image.Split('\\');
                                                     string _ImageFullStr = Args_Listitem._Image;
