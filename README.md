@@ -45,8 +45,8 @@ Note: in the New version of BEV4 these EIDs created in Winfowd Event Log Name "B
      EID 1: Start BEV4
      EID 2: True Positive Detections
      EID 3: False Positive Detections
-     EID 254: BEV4.3 Realtime DB Update Method 2
-     EID 255: BEV4.3 Realtime DB Update Method 1
+     EID 254: BEV4.3 Realtime DB Updated via Method 2
+     EID 255: BEV4.3 Realtime DB Updated via Method 1
 
 Important point: About Mitre Attack Detections This code [BEV4 (v4.0)] is/was my test codes (which i will publish here....) to use some Mitre Attacks Techniques (Using Atomic red-team) yaml files just for test & help to Blue teamers to learn these things better, BEV4 test is/was very good in my opinion but ofcourse i know this will not Detect every thing but this is very good example to start for Attack Detection based on Some Mitre Attack Data (using Sysmon EID 1 ONLY in my code) + yaml files & .... , you can see every Technique has steps (Procedures) which in my code BEV4 these steps or Procedures will detect by Sysmon EID 1 (commandLine) or ETW events (CommandLine) etc, in my code i created one simple "Techniques Database" which has all steps (Procedures) for each Technique (created base on yaml file for Atomic-Red-Team). that means in my DB i have technique A with 3 lines CommandLine and my code will Detected each commandline and scan them for detection for each Sysmon/ETW events, and make score for each detection but this is not enough for very good detection (which i learned this when i make this BEV4.0 ;D ) , because always you can bypass some detection very simple (sometimes), so if you think yaml file or Mitre Attack is enough always, you are wrong (i am sure 100% about this even before make this code) but Mitre Attack is very useful thing in my opinion and as i said before "Mitre Attack is/Can not Cover Everything...", anyway this code was fun also i learned alot from yaml files (atomic-red-team) + Mitre Attack things but i am sure this (my code) will not cover all things etc this just is for test.... also about Steps (Procedures) for Each Techniques you always can bypass detection, why? because always you can!
 
