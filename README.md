@@ -100,3 +100,5 @@ video link : https://youtu.be/MHfGIY2IyXE?t=414
    
    
 <p><a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/DamonMohammadbagher/BEV4/"/></a></p>
+
+<a href="https://info.flagcounter.com/puFY"><img src="https://s01.flagcounter.com/count/puFY/bg_FFFFFF/txt_000000/border_CCCCCC/columns_5/maxflags_20/viewers_0/labels_0/pageviews_0/flags_0/percent_0/" alt="Flag Counter" border="0"></a>
